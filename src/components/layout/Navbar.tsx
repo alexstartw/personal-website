@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 const PAGE_LINKS = [
   { href: "/", labelKey: "Home" },
   { href: "/about", labelKey: "About" },
+  { href: "/experience", labelKey: "Experience" },
   { href: "/projects", labelKey: "Projects" },
 ];
 
