@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { AnimatedText } from "@/components/ui/AnimatedText";
 import { FadeIn } from "@/components/ui/FadeIn";
@@ -47,16 +48,32 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
         <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* ── Left: hero content ─────────────────────────────── */}
           <div>
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--muted)]"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              {h.badge}
-            </motion.div>
+            {/* Avatar + badge row */}
+            <div className="flex items-center gap-4 mb-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-[var(--accent)]/30 shrink-0"
+              >
+                <Image
+                  src="/avatar.jpg"
+                  alt="Alex Lin"
+                  fill
+                  className="object-cover object-top"
+                  priority
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--muted)]"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                {h.badge}
+              </motion.div>
+            </div>
 
             {/* Name + title */}
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.08] mb-5">
