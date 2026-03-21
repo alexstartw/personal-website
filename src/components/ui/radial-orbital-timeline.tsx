@@ -156,18 +156,28 @@ export default function RadialOrbitalTimeline({
                 />
 
                 {/* Icon button */}
-                <div
-                  className={`
-                    w-10 h-10 rounded-full flex items-center justify-center
-                    border-2 transition-all duration-300
-                    ${
-                      isActive
-                        ? "bg-foreground text-background border-foreground shadow-lg scale-150"
-                        : "bg-background text-foreground border-foreground/40 hover:border-foreground/70"
-                    }
-                  `}
-                >
-                  <Icon size={16} />
+                <div className="relative">
+                  <div
+                    className={`
+                      w-10 h-10 rounded-full flex items-center justify-center
+                      border-2 transition-all duration-300
+                      ${
+                        isActive
+                          ? "bg-foreground text-background border-foreground shadow-lg scale-150"
+                          : "bg-background text-foreground border-foreground/40 hover:border-foreground/70"
+                      }
+                    `}
+                  >
+                    <Icon size={16} />
+                  </div>
+
+                  {/* Current role indicator */}
+                  {item.status === "in-progress" && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 pointer-events-none">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 border border-background" />
+                    </span>
+                  )}
                 </div>
 
                 {/* Label */}
@@ -216,11 +226,19 @@ export default function RadialOrbitalTimeline({
                           </p>
 
                           {/* Company + date */}
-                          <p className="text-xs text-muted mb-3">
-                            {item.company}
-                            <span className="mx-1.5 opacity-40">·</span>
-                            {item.date}
-                          </p>
+                          <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                            <p className="text-xs text-muted">
+                              {item.company}
+                              <span className="mx-1.5 opacity-40">·</span>
+                              {item.date}
+                            </p>
+                            {item.status === "in-progress" && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 tracking-widest uppercase">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                Now
+                              </span>
+                            )}
+                          </div>
 
                           {/* Description (1 line) */}
                           <p className="text-xs text-foreground/70 line-clamp-2 leading-relaxed mb-3">
