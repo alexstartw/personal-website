@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -55,10 +55,19 @@ const DOCK_ITEMS = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const isHome = pathname === "/";
+  // Pages that show the Apple Dock instead of plain text links
+  const showDock = isHome || pathname === "/experience";
+
+  // Dock click: scroll on home, navigate to section anchor on other pages
+  const handleDockClick = (id: string) => {
+    if (isHome) scrollToSection(id);
+    else router.push(`/#${id}`);
+  };
 
   useEffect(() => {
     if (!isHome) return;
@@ -105,9 +114,9 @@ export function Navbar() {
           </Link>
         )}
 
-        {/* Center — Dock (home) or page links (other pages) */}
+        {/* Center — Dock (home + experience) or page links (other pages) */}
         <div className="flex-1 flex justify-center">
-          {isHome ? (
+          {showDock ? (
             /* Apple Dock in header */
             <AppleDock
               iconSize={32}
@@ -116,7 +125,7 @@ export function Navbar() {
               className="h-10 gap-1 rounded-xl px-2 border-0 bg-transparent backdrop-blur-none shadow-none"
             >
               <AppleDockIcon
-                onClick={() => scrollToSection("hero")}
+                onClick={() => isHome ? scrollToSection("hero") : router.push("/")}
                 className="hover:bg-[var(--border)] transition-colors rounded-lg"
                 title="Home"
                 aria-label="Home"
@@ -130,7 +139,7 @@ export function Navbar() {
               {DOCK_ITEMS.map(({ id, icon: Icon, color, bg, labelKey }) => (
                 <AppleDockIcon
                   key={id}
-                  onClick={() => scrollToSection(id)}
+                  onClick={() => handleDockClick(id)}
                   className={cn(
                     "relative rounded-lg transition-colors",
                     bg,
