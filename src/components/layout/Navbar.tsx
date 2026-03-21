@@ -60,7 +60,8 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const isHome = pathname === "/";
-  const showDock = isHome || pathname === "/experience";
+  const showDock =
+    isHome || pathname === "/experience" || pathname.startsWith("/projects/");
 
   const handleDockClick = (id: string) => {
     if (isHome) scrollToSection(id);
