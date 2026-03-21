@@ -94,14 +94,12 @@ export function ExperienceSection() {
       <div className="absolute top-0 left-0 right-0 px-6 pt-14 pb-3 z-10 pointer-events-none">
         <div className="max-w-5xl mx-auto">
           <FadeIn>
-            <p className="text-xs font-medium tracking-widest uppercase text-accent mb-1">
+            <span className="text-xs font-medium tracking-widest uppercase text-[var(--accent)] mb-3 block">
               {e.label}
-            </p>
+            </span>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              {e.heading}
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold">{e.heading}</h2>
           </FadeIn>
         </div>
       </div>

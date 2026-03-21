@@ -118,27 +118,10 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
 
           {/* ── Right: about content ────────────────────────────── */}
           <div>
-            {/* Bio — skip education paragraph (bio3) */}
-            <div className="space-y-3 mb-6">
-              {([a.bio1, a.bio2, a.bio4] as string[]).map((bio, i) => (
-                <FadeIn key={i} delay={0.3 + i * 0.1}>
-                  <p
-                    className={`leading-relaxed text-sm ${
-                      i === 0
-                        ? "text-[var(--foreground)]"
-                        : "text-[var(--muted)]"
-                    }`}
-                  >
-                    {bio}
-                  </p>
-                </FadeIn>
-              ))}
-            </div>
-
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {a.stats.map((stat, i) => (
-                <FadeIn key={stat.label} delay={0.5 + i * 0.08} direction="up">
+                <FadeIn key={stat.label} delay={0.3 + i * 0.08} direction="up">
                   <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]/40 transition-colors h-full">
                     {stat.items ? (
                       <>
@@ -170,6 +153,23 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
                       </>
                     )}
                   </div>
+                </FadeIn>
+              ))}
+            </div>
+
+            {/* Bio — skip education paragraph (bio3) */}
+            <div className="space-y-3">
+              {([a.bio1, a.bio2, a.bio4] as string[]).map((bio, i) => (
+                <FadeIn key={i} delay={0.5 + i * 0.1}>
+                  <p
+                    className={`leading-relaxed text-sm ${
+                      i === 0
+                        ? "text-[var(--foreground)]"
+                        : "text-[var(--muted)]"
+                    }`}
+                  >
+                    {bio}
+                  </p>
                 </FadeIn>
               ))}
             </div>
