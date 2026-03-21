@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowRight, Link, Zap } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 export interface OrbitalTimelineItem {
   id: number;
@@ -16,86 +14,44 @@ export interface OrbitalTimelineItem {
   relatedIds: number[];
   status: "completed" | "in-progress" | "pending";
   energy: number;
+  /** Company / school name shown in popup */
+  company: string;
+  /** Up to 3 tags shown in popup as pills */
+  tags: string[];
+  /** ID string used for /experience?id=... routing */
+  slug: string;
 }
 
 interface RadialOrbitalTimelineProps {
   timelineData: OrbitalTimelineItem[];
+  /** Called when user clicks the popup card to navigate to detail */
+  onNavigate?: (slug: string) => void;
 }
 
 export default function RadialOrbitalTimeline({
   timelineData,
+  onNavigate,
 }: RadialOrbitalTimelineProps) {
-  const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>(
-    {},
-  );
+  const [activeId, setActiveId] = useState<number | null>(null);
   const [rotationAngle, setRotationAngle] = useState<number>(0);
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
-  const [pulseEffect, setPulseEffect] = useState<Record<number, boolean>>({});
-  const [centerOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [activeNodeId, setActiveNodeId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const orbitRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
-  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === containerRef.current || e.target === orbitRef.current) {
-      setExpandedItems({});
-      setActiveNodeId(null);
-      setPulseEffect({});
-      setAutoRotate(true);
-    }
-  };
-
-  const toggleItem = (id: number) => {
-    setExpandedItems((prev) => {
-      const newState = { ...prev };
-      Object.keys(newState).forEach((key) => {
-        if (parseInt(key) !== id) {
-          newState[parseInt(key)] = false;
-        }
-      });
-      newState[id] = !prev[id];
-
-      if (!prev[id]) {
-        setActiveNodeId(id);
-        setAutoRotate(false);
-        const relatedItems = getRelatedItems(id);
-        const newPulseEffect: Record<number, boolean> = {};
-        relatedItems.forEach((relId) => {
-          newPulseEffect[relId] = true;
-        });
-        setPulseEffect(newPulseEffect);
-        centerViewOnNode(id);
-      } else {
-        setActiveNodeId(null);
-        setAutoRotate(true);
-        setPulseEffect({});
-      }
-
-      return newState;
-    });
-  };
-
+  /* ── Rotation ─────────────────────────────────────────────────────────── */
   useEffect(() => {
-    let rotationTimer: ReturnType<typeof setInterval>;
-    if (autoRotate) {
-      rotationTimer = setInterval(() => {
-        setRotationAngle((prev) => {
-          const newAngle = (prev + 0.3) % 360;
-          return Number(newAngle.toFixed(3));
-        });
-      }, 50);
-    }
-    return () => {
-      if (rotationTimer) clearInterval(rotationTimer);
-    };
+    if (!autoRotate) return;
+    const timer = setInterval(() => {
+      setRotationAngle((prev) => Number(((prev + 0.3) % 360).toFixed(3)));
+    }, 50);
+    return () => clearInterval(timer);
   }, [autoRotate]);
 
+  /* ── Helpers ──────────────────────────────────────────────────────────── */
   const centerViewOnNode = (nodeId: number) => {
-    if (!nodeRefs.current[nodeId]) return;
     const nodeIndex = timelineData.findIndex((item) => item.id === nodeId);
-    const totalNodes = timelineData.length;
-    const targetAngle = (nodeIndex / totalNodes) * 360;
+    const targetAngle = (nodeIndex / timelineData.length) * 360;
     setRotationAngle(270 - targetAngle);
   };
 
@@ -103,79 +59,72 @@ export default function RadialOrbitalTimeline({
     const angle = ((index / total) * 360 + rotationAngle) % 360;
     const radius = 200;
     const radian = (angle * Math.PI) / 180;
-    const x = radius * Math.cos(radian) + centerOffset.x;
-    const y = radius * Math.sin(radian) + centerOffset.y;
+    const x = radius * Math.cos(radian);
+    const y = radius * Math.sin(radian);
     const zIndex = Math.round(100 + 50 * Math.cos(radian));
     const opacity = Math.max(
       0.4,
       Math.min(1, 0.4 + 0.6 * ((1 + Math.sin(radian)) / 2)),
     );
-    return { x, y, angle, zIndex, opacity };
+    return { x, y, zIndex, opacity };
   };
 
-  const getRelatedItems = (itemId: number): number[] => {
-    const currentItem = timelineData.find((item) => item.id === itemId);
-    return currentItem ? currentItem.relatedIds : [];
-  };
-
-  const isRelatedToActive = (itemId: number): boolean => {
-    if (!activeNodeId) return false;
-    return getRelatedItems(activeNodeId).includes(itemId);
-  };
-
-  const getStatusStyles = (status: OrbitalTimelineItem["status"]): string => {
-    switch (status) {
-      case "completed":
-        return "text-white bg-black border-white";
-      case "in-progress":
-        return "text-black bg-white border-black";
-      case "pending":
-        return "text-white bg-black/40 border-white/50";
-      default:
-        return "text-white bg-black/40 border-white/50";
+  /* ── Interaction ──────────────────────────────────────────────────────── */
+  const handleNodeClick = (id: number) => {
+    if (activeId === id) {
+      // second click on same node closes popup
+      setActiveId(null);
+      setAutoRotate(true);
+    } else {
+      setActiveId(id);
+      setAutoRotate(false);
+      centerViewOnNode(id);
     }
   };
 
+  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === containerRef.current || e.target === orbitRef.current) {
+      setActiveId(null);
+      setAutoRotate(true);
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent, slug: string) => {
+    e.stopPropagation();
+    onNavigate?.(slug);
+  };
+
+  /* ── Render ───────────────────────────────────────────────────────────── */
   return (
     <div
-      className="w-full h-full flex flex-col items-center justify-center bg-black overflow-hidden"
       ref={containerRef}
+      className="w-full h-full flex items-center justify-center bg-background overflow-visible"
       onClick={handleContainerClick}
     >
       <div className="relative w-full max-w-4xl h-full flex items-center justify-center">
         <div
-          className="absolute w-full h-full flex items-center justify-center"
           ref={orbitRef}
-          style={{
-            perspective: "1000px",
-            transform: `translate(${centerOffset.x}px, ${centerOffset.y}px)`,
-          }}
+          className="absolute w-full h-full flex items-center justify-center"
+          style={{ perspective: "1000px" }}
         >
-          {/* Center orb */}
-          <div className="absolute w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-teal-500 animate-pulse flex items-center justify-center z-10">
-            <div className="absolute w-20 h-20 rounded-full border border-white/20 animate-ping opacity-70" />
+          {/* ── Center orb ── */}
+          <div className="absolute w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-teal-500 animate-pulse flex items-center justify-center z-10 pointer-events-none">
+            <div className="absolute w-20 h-20 rounded-full border border-foreground/20 animate-ping opacity-70" />
             <div
-              className="absolute w-24 h-24 rounded-full border border-white/10 animate-ping opacity-50"
+              className="absolute w-24 h-24 rounded-full border border-foreground/10 animate-ping opacity-50"
               style={{ animationDelay: "0.5s" }}
             />
-            <div className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md" />
+            <div className="w-8 h-8 rounded-full bg-background/80 backdrop-blur-md" />
           </div>
 
-          {/* Orbit ring */}
-          <div className="absolute w-96 h-96 rounded-full border border-white/10" />
+          {/* ── Orbit ring ── */}
+          <div className="absolute w-96 h-96 rounded-full border border-foreground/10 pointer-events-none" />
 
+          {/* ── Nodes ── */}
           {timelineData.map((item, index) => {
             const position = calculateNodePosition(index, timelineData.length);
-            const isExpanded = expandedItems[item.id];
-            const isRelated = isRelatedToActive(item.id);
-            const isPulsing = pulseEffect[item.id];
+            const isActive = activeId === item.id;
             const Icon = item.icon;
-
-            const nodeStyle = {
-              transform: `translate(${position.x}px, ${position.y}px)`,
-              zIndex: isExpanded ? 200 : position.zIndex,
-              opacity: isExpanded ? 1 : position.opacity,
-            };
 
             return (
               <div
@@ -184,33 +133,38 @@ export default function RadialOrbitalTimeline({
                   nodeRefs.current[item.id] = el;
                 }}
                 className="absolute transition-all duration-700 cursor-pointer"
-                style={nodeStyle}
+                style={{
+                  transform: `translate(${position.x}px, ${position.y}px)`,
+                  zIndex: isActive ? 200 : position.zIndex,
+                  opacity: isActive ? 1 : position.opacity,
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleItem(item.id);
+                  handleNodeClick(item.id);
                 }}
               >
                 {/* Energy glow */}
                 <div
-                  className={`absolute rounded-full -inset-1 ${isPulsing ? "animate-pulse duration-1000" : ""}`}
+                  className={`absolute rounded-full pointer-events-none ${isActive ? "animate-pulse" : ""}`}
                   style={{
-                    background: `radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)`,
+                    background: `radial-gradient(circle, color-mix(in srgb, var(--accent) 25%, transparent) 0%, transparent 70%)`,
                     width: `${item.energy * 0.5 + 40}px`,
                     height: `${item.energy * 0.5 + 40}px`,
-                    left: `-${(item.energy * 0.5 + 40 - 40) / 2}px`,
-                    top: `-${(item.energy * 0.5 + 40 - 40) / 2}px`,
+                    left: `-${(item.energy * 0.5) / 2}px`,
+                    top: `-${(item.energy * 0.5) / 2}px`,
                   }}
                 />
 
-                {/* Node icon */}
+                {/* Icon button */}
                 <div
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center
-                    ${isExpanded ? "bg-white text-black" : isRelated ? "bg-white/50 text-black" : "bg-black text-white"}
-                    border-2
-                    ${isExpanded ? "border-white shadow-lg shadow-white/30" : isRelated ? "border-white animate-pulse" : "border-white/40"}
-                    transition-all duration-300 transform
-                    ${isExpanded ? "scale-150" : ""}
+                    border-2 transition-all duration-300
+                    ${
+                      isActive
+                        ? "bg-foreground text-background border-foreground shadow-lg scale-150"
+                        : "bg-background text-foreground border-foreground/40 hover:border-foreground/70"
+                    }
                   `}
                 >
                   <Icon size={16} />
@@ -219,101 +173,85 @@ export default function RadialOrbitalTimeline({
                 {/* Label */}
                 <div
                   className={`
-                    absolute top-12 whitespace-nowrap
-                    text-xs font-semibold tracking-wider
-                    transition-all duration-300
-                    ${isExpanded ? "text-white scale-125" : "text-white/70"}
+                    absolute top-12 whitespace-nowrap text-xs font-semibold
+                    tracking-wider pointer-events-none transition-all duration-300
+                    ${isActive ? "text-foreground" : "text-foreground/60"}
                   `}
                   style={{
                     left: "50%",
-                    transform: isExpanded
-                      ? "translateX(-50%) scale(1.25)"
+                    transform: isActive
+                      ? "translateX(-50%) scale(1.2)"
                       : "translateX(-50%)",
                   }}
                 >
                   {item.title}
                 </div>
 
-                {/* Expanded card */}
-                {isExpanded && (
-                  <Card className="absolute top-20 left-1/2 -translate-x-1/2 w-64 bg-black/90 backdrop-blur-lg border-white/30 shadow-xl shadow-white/10 overflow-visible">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-px h-3 bg-white/50" />
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-center">
-                        <Badge
-                          className={`px-2 text-xs ${getStatusStyles(item.status)}`}
-                        >
-                          {item.status === "completed"
-                            ? "COMPLETE"
-                            : item.status === "in-progress"
-                              ? "IN PROGRESS"
-                              : "PENDING"}
-                        </Badge>
-                        <span className="text-xs font-mono text-white/50">
-                          {item.date}
-                        </span>
-                      </div>
-                      <CardTitle className="text-sm mt-2 text-white">
-                        {item.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-xs text-white/80">
-                      <p>{item.content}</p>
+                {/* ── Popup card ── */}
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: 8 }}
+                      transition={{
+                        duration: 0.18,
+                        ease: [0.25, 0.1, 0.25, 1],
+                      }}
+                      className="absolute top-full mt-16 left-1/2 -translate-x-1/2 w-60 z-[300]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Connector line */}
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-px h-3 bg-border" />
 
-                      <div className="mt-4 pt-3 border-t border-white/10">
-                        <div className="flex justify-between items-center text-xs mb-1">
-                          <span className="flex items-center">
-                            <Zap size={10} className="mr-1" />
-                            Energy Level
-                          </span>
-                          <span className="font-mono">{item.energy}%</span>
-                        </div>
-                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
-                            style={{ width: `${item.energy}%` }}
-                          />
-                        </div>
-                      </div>
+                      {/* Card */}
+                      <div
+                        className="rounded-xl border border-border bg-card shadow-lg shadow-black/10 dark:shadow-black/40 overflow-hidden cursor-pointer group"
+                        onClick={(e) => handleCardClick(e, item.slug)}
+                      >
+                        <div className="p-4">
+                          {/* Title */}
+                          <p className="font-semibold text-sm text-foreground leading-snug mb-1 group-hover:text-accent transition-colors">
+                            {item.title}
+                          </p>
 
-                      {item.relatedIds.length > 0 && (
-                        <div className="mt-4 pt-3 border-t border-white/10">
-                          <div className="flex items-center mb-2">
-                            <Link size={10} className="text-white/70 mr-1" />
-                            <h4 className="text-xs uppercase tracking-wider font-medium text-white/70">
-                              Connected
-                            </h4>
+                          {/* Company + date */}
+                          <p className="text-xs text-muted mb-3">
+                            {item.company}
+                            <span className="mx-1.5 opacity-40">·</span>
+                            {item.date}
+                          </p>
+
+                          {/* Description (1 line) */}
+                          <p className="text-xs text-foreground/70 line-clamp-2 leading-relaxed mb-3">
+                            {item.content}
+                          </p>
+
+                          {/* Tags */}
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {item.tags.slice(0, 3).map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-accent/10 text-accent border border-accent/20"
+                              >
+                                {tag}
+                              </span>
+                            ))}
                           </div>
-                          <div className="flex flex-wrap gap-1">
-                            {item.relatedIds.map((relatedId) => {
-                              const relatedItem = timelineData.find(
-                                (i) => i.id === relatedId,
-                              );
-                              return (
-                                <Button
-                                  key={relatedId}
-                                  variant="outline"
-                                  size="sm"
-                                  className="flex items-center h-6 px-2 py-0 text-xs rounded-none border-white/20 bg-transparent hover:bg-white/10 text-white/80 hover:text-white transition-all"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleItem(relatedId);
-                                  }}
-                                >
-                                  {relatedItem?.title}
-                                  <ArrowRight
-                                    size={8}
-                                    className="ml-1 text-white/60"
-                                  />
-                                </Button>
-                              );
-                            })}
+
+                          {/* CTA */}
+                          <div className="flex items-center gap-1 text-[11px] text-muted group-hover:text-accent transition-colors">
+                            <span>View details</span>
+                            <ArrowRight
+                              size={10}
+                              className="translate-x-0 group-hover:translate-x-0.5 transition-transform"
+                            />
                           </div>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}

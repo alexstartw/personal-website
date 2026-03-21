@@ -60,10 +60,8 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const isHome = pathname === "/";
-  // Pages that show the Apple Dock instead of plain text links
   const showDock = isHome || pathname === "/experience";
 
-  // Dock click: scroll on home, navigate to section anchor on other pages
   const handleDockClick = (id: string) => {
     if (isHome) scrollToSection(id);
     else router.push(`/#${id}`);
@@ -125,7 +123,9 @@ export function Navbar() {
               className="h-10 gap-1 rounded-xl px-2 border-0 bg-transparent backdrop-blur-none shadow-none"
             >
               <AppleDockIcon
-                onClick={() => isHome ? scrollToSection("hero") : router.push("/")}
+                onClick={() =>
+                  isHome ? scrollToSection("hero") : router.push("/")
+                }
                 className="hover:bg-[var(--border)] transition-colors rounded-lg"
                 title="Home"
                 aria-label="Home"
