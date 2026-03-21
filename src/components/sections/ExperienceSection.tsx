@@ -55,7 +55,7 @@ function EventPopover({ event, lang, pos }: { event: TimelineEvent; lang: string
   );
 }
 
-// ── Dot ────────────────────────────────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────────────────
 function dotClass(event: TimelineEvent, isHovered: boolean) {
   if (event.freelance) return isHovered
     ? "border-emerald-400 bg-emerald-400 text-white"
@@ -64,100 +64,73 @@ function dotClass(event: TimelineEvent, isHovered: boolean) {
     ? "border-[var(--accent)] bg-[var(--accent)] text-white"
     : "border-[var(--accent)] bg-[var(--background)] text-[var(--accent)]";
   return isHovered
-    ? "border-[var(--muted)] bg-[var(--muted)] text-white"
-    : "border-[var(--border)] bg-[var(--background)] text-[var(--muted)]";
+    ? "border-purple-400 bg-purple-400 text-white"
+    : "border-purple-400/50 bg-[var(--background)] text-purple-400";
 }
 
-// ── Card content ────────────────────────────────────────────────────────────
+function typeColor(event: TimelineEvent) {
+  if (event.freelance) return "text-emerald-500";
+  if (event.type === "work") return "text-[var(--accent)]";
+  return "text-purple-400";
+}
+
+function edgeBorderClass(event: TimelineEvent, isLeft: boolean) {
+  const side = isLeft ? "border-r-2" : "border-l-2";
+  if (event.freelance)      return `${side} ${isLeft ? "border-r-emerald-400/50" : "border-l-emerald-400/50"}`;
+  if (event.type === "work") return `${side} ${isLeft ? "border-r-[var(--accent)]/50" : "border-l-[var(--accent)]/50"}`;
+  return                            `${side} ${isLeft ? "border-r-purple-400/40"   : "border-l-purple-400/40"}`;
+}
+
+// ── Card body ────────────────────────────────────────────────────────────────
 function CardBody({
   event, title, company, lang, isLeft, isAccented,
 }: {
   event: TimelineEvent; title: string; company: string;
   lang: string; isLeft: boolean; isAccented: boolean;
 }) {
-  const isFreelance = event.freelance === true;
-
   return (
-    <div className={cn("py-2 px-3 select-none", isLeft ? "text-right" : "text-left")}>
-      {/* Year row */}
-      <div className={cn("flex items-center gap-1.5 mb-1", isLeft ? "justify-end" : "justify-start")}>
-        <span className={cn(
-          "text-[9px] font-semibold tracking-[0.15em] uppercase",
-          isAccented ? "text-white/60" : "text-[var(--muted)]",
-        )}>
-          {event.year}
-        </span>
-        {isFreelance && (
-          <span className={cn(
-            "text-[8px] font-bold px-1.5 py-px rounded-full tracking-widest uppercase",
-            isAccented ? "bg-white/20 text-white" : "bg-emerald-500/10 text-emerald-500",
-          )}>
-            {lang === "zh" ? "副業" : "Side"}
-          </span>
-        )}
-        <span className={cn(
-          "text-[8px] font-semibold px-1.5 py-px rounded-full tracking-widest uppercase",
-          isAccented
-            ? "bg-white/15 text-white/70"
-            : event.type === "work"
-              ? "bg-[var(--accent)]/10 text-[var(--accent)]"
-              : "bg-[var(--border)] text-[var(--muted)]",
-        )}>
-          {event.type === "work"
-            ? (lang === "zh" ? "工作" : "Work")
-            : (lang === "zh" ? "學歷" : "Edu")}
-        </span>
-      </div>
-
+    <div className={cn("px-3 py-2 select-none", isLeft ? "text-right" : "text-left")}>
       {/* Title */}
       <h3 className={cn(
-        "font-bold text-sm leading-tight mb-1",
+        "font-semibold text-[12px] leading-snug mb-1",
         isAccented ? "text-white" : "text-[var(--foreground)]",
       )}>
         {title}
       </h3>
 
       {/* Company + logo */}
-      <div className={cn("flex items-center gap-1.5 mb-2", isLeft ? "justify-end" : "justify-start")}>
+      <div className={cn("flex items-center gap-1.5 mb-1.5", isLeft ? "justify-end" : "justify-start")}>
         {!isLeft && event.logo && (
-          <div className="w-4 h-4 rounded-sm overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-sm">
-            <Image src={event.logo} alt={event.company} width={16} height={16} className="object-contain w-full h-full" />
+          <div className="w-3.5 h-3.5 rounded-sm overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-sm">
+            <Image src={event.logo} alt={event.company} width={14} height={14} className="object-contain w-full h-full" />
           </div>
         )}
-        <span className={cn(
-          "text-[11px] font-medium",
-          isAccented ? "text-white/80" : "text-[var(--muted)]",
-        )}>
+        <span className={cn("text-[11px]", isAccented ? "text-white/75" : "text-[var(--muted)]")}>
           {company}
         </span>
         {isLeft && event.logo && (
-          <div className="w-4 h-4 rounded-sm overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-sm">
-            <Image src={event.logo} alt={event.company} width={16} height={16} className="object-contain w-full h-full" />
+          <div className="w-3.5 h-3.5 rounded-sm overflow-hidden bg-white flex items-center justify-center shrink-0 shadow-sm">
+            <Image src={event.logo} alt={event.company} width={14} height={14} className="object-contain w-full h-full" />
           </div>
         )}
       </div>
 
-      {/* Tags — dot style */}
+      {/* Tags */}
       <div className={cn("flex flex-wrap gap-1", isLeft ? "justify-end" : "justify-start")}>
-        {event.tags.slice(0, 3).map((tag) => (
+        {event.tags.slice(0, 2).map((tag) => (
           <span
             key={tag}
             className={cn(
-              "text-[9px] font-medium px-1.5 py-0.5 rounded-sm tracking-wide",
-              isAccented
-                ? "bg-white/15 text-white/80"
-                : "bg-[var(--border)] text-[var(--muted)]",
+              "text-[9px] font-medium px-1.5 py-px rounded-sm tracking-wide",
+              isAccented ? "bg-white/15 text-white/80" : "bg-[var(--border)] text-[var(--muted)]",
             )}
           >
             {tag}
           </span>
         ))}
-        {event.tags.length > 3 && (
-          <span className={cn(
-            "text-[9px] font-medium px-1.5 py-0.5 rounded-sm",
-            isAccented ? "text-white/60" : "text-[var(--muted)]",
-          )}>
-            +{event.tags.length - 3}
+        {event.tags.length > 2 && (
+          <span className={cn("text-[9px] px-1 py-px", isAccented ? "text-white/50" : "text-[var(--muted)]")}>
+            +{event.tags.length - 2}
           </span>
         )}
       </div>
@@ -165,7 +138,27 @@ function CardBody({
   );
 }
 
-// ── Main section ───────────────────────────────────────────────────────────
+// ── Spacer info (year + type badge shown in the wide side) ──────────────────
+function SpacerInfo({ event, lang, align }: { event: TimelineEvent; lang: string; align: "left" | "right" }) {
+  const typeLabel = event.freelance
+    ? (lang === "zh" ? "副業" : "Side")
+    : event.type === "work"
+      ? (lang === "zh" ? "工作" : "Work")
+      : (lang === "zh" ? "學歷" : "Edu");
+
+  return (
+    <div className={cn("flex flex-col gap-0.5", align === "right" ? "items-start" : "items-end")}>
+      <span className={cn("text-[8px] font-bold tracking-widest uppercase", typeColor(event))}>
+        {typeLabel}
+      </span>
+      <span className="text-[9px] font-medium tracking-wide text-[var(--muted)] whitespace-nowrap">
+        {event.year}
+      </span>
+    </div>
+  );
+}
+
+// ── Main section ────────────────────────────────────────────────────────────
 export function ExperienceSection() {
   const { t, lang } = useLanguage();
   const e = t.experience;
@@ -175,21 +168,18 @@ export function ExperienceSection() {
   const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [dotPositions, setDotPositions] = useState<{ x: number; y: number }[]>([]);
 
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId]   = useState<string | null>(null);
   const [popoverPos, setPopoverPos] = useState<PopoverPos>({ x: 0, y: 0, above: false });
   const hoveredEvent = timeline.find((ev) => ev.id === hoveredId) ?? null;
 
   const measureDots = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
-    const containerRect = container.getBoundingClientRect();
+    const cr = container.getBoundingClientRect();
     const positions = dotRefs.current.map((dot) => {
       if (!dot) return { x: 0, y: 0 };
-      const rect = dot.getBoundingClientRect();
-      return {
-        x: rect.left + rect.width / 2 - containerRect.left,
-        y: rect.top + rect.height / 2 - containerRect.top,
-      };
+      const r = dot.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - cr.left, y: r.top + r.height / 2 - cr.top };
     });
     setDotPositions(positions);
   }, []);
@@ -213,7 +203,7 @@ export function ExperienceSection() {
   }, []);
 
   const handleMouseLeave = useCallback(() => setHoveredId(null), []);
-  const handleClick = useCallback((id: string) => router.push(`/experience/${id}`), [router]);
+  const handleClick      = useCallback((id: string) => router.push(`/experience/${id}`), [router]);
 
   const buildCurve = (p1: { x: number; y: number }, p2: { x: number; y: number }) => {
     const midY = (p1.y + p2.y) / 2;
@@ -222,21 +212,22 @@ export function ExperienceSection() {
 
   return (
     <section id="experience" className="relative h-screen snap-start snap-always flex flex-col">
+
       {/* Header */}
-      <div className="px-6 pt-16 pb-4 max-w-5xl mx-auto w-full shrink-0">
+      <div className="px-6 pt-14 pb-3 max-w-5xl mx-auto w-full shrink-0">
         <FadeIn>
-          <p className="text-xs font-medium tracking-widest uppercase text-[var(--accent)] mb-1.5">{e.label}</p>
+          <p className="text-xs font-medium tracking-widest uppercase text-[var(--accent)] mb-1">{e.label}</p>
         </FadeIn>
         <FadeIn delay={0.1}>
           <h2 className="text-2xl md:text-3xl font-bold">{e.heading}</h2>
         </FadeIn>
       </div>
 
-      {/* Zigzag timeline */}
+      {/* Timeline */}
       <div
         ref={containerRef}
         className="flex-1 relative max-w-5xl mx-auto w-full px-6 flex flex-col"
-        style={{ paddingBottom: 24 }}
+        style={{ paddingBottom: 20 }}
       >
         {/* SVG curves */}
         {dotPositions.length === timeline.length && (
@@ -245,23 +236,23 @@ export function ExperienceSection() {
             aria-hidden="true"
           >
             <defs>
-              <linearGradient id="curve-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%"   stopColor="var(--accent)" stopOpacity="0.55" />
-                <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.12" />
+              <linearGradient id="cg" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stopColor="var(--accent)" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.1" />
               </linearGradient>
             </defs>
             {dotPositions.slice(0, -1).map((pos, i) => (
               <motion.path
                 key={i}
                 d={buildCurve(pos, dotPositions[i + 1])}
-                stroke="url(#curve-grad)"
-                strokeWidth={2}
+                stroke="url(#cg)"
+                strokeWidth={1.5}
                 fill="none"
                 initial={{ pathLength: 0, opacity: 0 }}
                 animate={{ pathLength: 1, opacity: 1 }}
                 transition={{
-                  pathLength: { duration: 1, delay: 0.3 + i * 0.12, ease: "easeInOut" },
-                  opacity: { duration: 0.2, delay: 0.3 + i * 0.12 },
+                  pathLength: { duration: 0.9, delay: 0.25 + i * 0.1, ease: "easeInOut" },
+                  opacity:    { duration: 0.2,  delay: 0.25 + i * 0.1 },
                 }}
               />
             ))}
@@ -270,32 +261,32 @@ export function ExperienceSection() {
 
         {/* Rows */}
         {timeline.map((event, i) => {
-          const isLeft = i % 2 === 0;
-          const title   = lang === "zh" && event.titleZh   ? event.titleZh   : event.title;
-          const company = lang === "zh" && event.companyZh ? event.companyZh : event.company;
+          // isLeft → dot sits in the LEFT third of the row (flex-[1] | dot | flex-[2])
+          // isRight → dot sits in the RIGHT third (flex-[2] | dot | flex-[1])
+          const isLeft    = i % 2 === 0;
+          const title     = lang === "zh" && event.titleZh   ? event.titleZh   : event.title;
+          const company   = lang === "zh" && event.companyZh ? event.companyZh : event.company;
           const isHovered = hoveredId === event.id;
 
           const card = (
             <motion.div
-              initial={{ opacity: 0, x: isLeft ? -16 : 16 }}
+              initial={{ opacity: 0, x: isLeft ? -12 : 12 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-10px" }}
-              transition={{ duration: 0.4, delay: i * 0.04, ease: [0.25, 0.1, 0.25, 1] }}
+              viewport={{ once: true, margin: "-8px" }}
+              transition={{ duration: 0.36, delay: i * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
               onMouseEnter={(ev) => handleMouseEnter(ev, event.id)}
               onMouseLeave={handleMouseLeave}
               onClick={() => handleClick(event.id)}
-              className="cursor-pointer w-fit"
+              className="cursor-pointer"
             >
               <TimelineRevealCard
                 originX={isLeft ? "100%" : "0%"}
                 originY="50%"
-                className="rounded-lg"
+                className="rounded-lg w-[188px]"
                 base={
                   <div className={cn(
                     "rounded-lg border border-[var(--border)] bg-[var(--card)]",
-                    isLeft
-                      ? "border-r-2 border-r-[var(--accent)]/40"
-                      : "border-l-2 border-l-[var(--accent)]/40",
+                    edgeBorderClass(event, isLeft),
                   )}>
                     <CardBody event={event} title={title} company={company} lang={lang} isLeft={isLeft} isAccented={false} />
                   </div>
@@ -315,10 +306,10 @@ export function ExperienceSection() {
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.28, delay: i * 0.05 + 0.15 }}
-              animate={isHovered ? { scale: 1.25 } : { scale: 1 }}
+              transition={{ duration: 0.25, delay: i * 0.05 + 0.18 }}
+              animate={isHovered ? { scale: 1.22 } : { scale: 1 }}
               className={cn(
-                "relative z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center text-[9px] font-bold transition-colors duration-200 shrink-0",
+                "relative z-10 w-5 h-5 rounded-full border-2 flex items-center justify-center text-[7px] font-bold shrink-0 transition-colors duration-200",
                 dotClass(event, isHovered),
               )}
             >
@@ -326,21 +317,34 @@ export function ExperienceSection() {
             </motion.div>
           );
 
+          const info = (
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: i * 0.05 + 0.1 }}
+            >
+              <SpacerInfo event={event} lang={lang} align={isLeft ? "right" : "left"} />
+            </motion.div>
+          );
+
           return (
             <div key={event.id} className="flex-1 flex items-center gap-2">
               {isLeft ? (
                 <>
-                  {/* card hugs right (toward dot) */}
-                  <div className="flex-[2] flex justify-end min-w-0">{card}</div>
+                  {/* card in narrow left third → hugs toward dot */}
+                  <div className="flex-[1] flex justify-end min-w-0 pr-2">{card}</div>
                   {dot}
-                  <div className="flex-[3]" />
+                  {/* info in wide right two-thirds */}
+                  <div className="flex-[2] pl-3">{info}</div>
                 </>
               ) : (
                 <>
-                  <div className="flex-[3]" />
+                  {/* info in wide left two-thirds */}
+                  <div className="flex-[2] flex justify-end pr-3">{info}</div>
                   {dot}
-                  {/* card hugs left (toward dot) */}
-                  <div className="flex-[2] flex justify-start min-w-0">{card}</div>
+                  {/* card in narrow right third → hugs toward dot */}
+                  <div className="flex-[1] flex justify-start min-w-0 pl-2">{card}</div>
                 </>
               )}
             </div>
