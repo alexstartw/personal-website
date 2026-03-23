@@ -4,7 +4,14 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Briefcase, FolderOpen, Code2, Mail, Home } from "lucide-react";
+import {
+  Briefcase,
+  FolderOpen,
+  Code2,
+  Mail,
+  Home,
+  BookOpen,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LangToggle } from "@/components/ui/LangToggle";
 import { AppleDock, AppleDockIcon } from "@/components/ui/apple-dock";
@@ -52,6 +59,13 @@ const DOCK_ITEMS = [
     bg: "hover:bg-green-400/10",
     labelKey: "contact" as const,
   },
+  {
+    id: "blog",
+    icon: BookOpen,
+    color: "text-orange-400",
+    bg: "hover:bg-orange-400/10",
+    labelKey: "blog" as const,
+  },
 ] as const;
 
 export function Navbar() {
@@ -62,9 +76,17 @@ export function Navbar() {
   const [activeSection, setActiveSection] = useState<string>("");
   const isHome = pathname === "/";
   const showDock =
-    isHome || pathname === "/experience" || pathname.startsWith("/projects/");
+    isHome ||
+    pathname === "/experience" ||
+    pathname.startsWith("/projects/") ||
+    pathname === "/blog" ||
+    pathname.startsWith("/blog/");
 
   const handleDockClick = (id: string) => {
+    if (id === "blog") {
+      router.push("/blog");
+      return;
+    }
     if (isHome) scrollToSection(id);
     else router.push(`/#${id}`);
   };

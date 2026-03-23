@@ -7,6 +7,7 @@ export const zh: Locale = {
     experience: "經歷",
     projects: "專案",
     contact: "聯絡",
+    blog: "部落格",
   },
   hero: {
     badge: "積極尋求工作機會",

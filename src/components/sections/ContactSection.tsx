@@ -122,14 +122,50 @@ export function ContactSection() {
         </FadeIn>
       </div>
 
-      {/* Footer line */}
-      <div className="absolute bottom-8 left-0 right-0 text-center">
-        <FadeIn delay={0.5}>
-          <p className="text-xs text-[var(--muted)]">
-            © {new Date().getFullYear()} · {c.footer}
-          </p>
-        </FadeIn>
-      </div>
+      {/* VS Code–style status bar footer */}
+      <FadeIn delay={0.55}>
+        <div className="absolute bottom-0 left-0 right-0 h-8 border-t border-[var(--border)] bg-[var(--card)]/70 backdrop-blur-sm flex items-center px-5 gap-3 overflow-hidden">
+          {/* Left — terminal prompt */}
+          <span className="font-mono text-[10px] leading-none flex items-center gap-1 shrink-0">
+            <span className="text-[var(--accent)]">alex</span>
+            <span className="text-[var(--muted)]/50">@</span>
+            <span className="text-[var(--foreground)]/60">taipei</span>
+            <span className="text-[var(--muted)]/40 ml-1">:~$</span>
+          </span>
+
+          <span className="w-px h-3 bg-[var(--border)] shrink-0" />
+
+          <span className="font-mono text-[10px] text-[var(--muted)]/60 leading-none shrink-0 hidden sm:block">
+            Senior Data Engineer
+          </span>
+
+          <div className="flex-1" />
+
+          {/* Right — year + social icons */}
+          <span className="font-mono text-[10px] text-[var(--muted)]/50 leading-none shrink-0">
+            © {new Date().getFullYear()}
+          </span>
+
+          <span className="w-px h-3 bg-[var(--border)] shrink-0" />
+
+          <div className="flex items-center gap-3 shrink-0">
+            {LINKS.map((link) => (
+              <Link
+                key={link.key}
+                href={link.href}
+                target={link.key !== "email" ? "_blank" : undefined}
+                rel={link.key !== "email" ? "noopener noreferrer" : undefined}
+                aria-label={link.key}
+                className="text-[var(--muted)]/50 hover:text-[var(--accent)] transition-colors"
+              >
+                <span className="block scale-75 origin-center">
+                  {link.icon}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </FadeIn>
     </section>
   );
 }

@@ -5,6 +5,7 @@ export interface Locale {
     experience: string;
     projects: string;
     contact: string;
+    blog: string;
   };
   hero: {
     badge: string;
@@ -67,6 +68,7 @@ export const en: Locale = {
     experience: "Experience",
     projects: "Projects",
     contact: "Contact",
+    blog: "Blog",
   },
   hero: {
     badge: "Available for opportunities",

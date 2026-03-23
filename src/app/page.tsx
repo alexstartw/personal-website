@@ -45,23 +45,13 @@ export default function Home() {
       {/* Side navigation dots */}
       <SectionDots activeSection={activeSection} onDotClick={scrollTo} />
 
-      {/* Scroll snap container */}
+      {/* Scroll snap container — sections declare their own snap-start snap-always */}
       <div ref={containerRef} className="snap-container">
-        <div className="snap-section">
-          <HeroSection onScrollTo={scrollTo} />
-        </div>
-        <div className="snap-section">
-          <ExperienceSection />
-        </div>
-        <div className="snap-section">
-          <ProjectsSection onScrollTo={scrollTo} />
-        </div>
-        <div className="snap-section">
-          <SkillsSection />
-        </div>
-        <div className="snap-section">
-          <ContactSection />
-        </div>
+        <HeroSection onScrollTo={scrollTo} />
+        <ExperienceSection />
+        <ProjectsSection onScrollTo={scrollTo} />
+        <SkillsSection />
+        <ContactSection />
       </div>
     </>
   );
