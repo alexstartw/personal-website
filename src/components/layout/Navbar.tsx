@@ -16,6 +16,7 @@ const PAGE_LINKS = [
   { href: "/about", labelKey: "About" },
   { href: "/experience", labelKey: "Experience" },
   { href: "/projects", labelKey: "Projects" },
+  { href: "/blog", labelKey: "Blog" },
 ];
 
 function scrollToSection(id: string) {
