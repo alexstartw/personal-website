@@ -16,7 +16,7 @@ cover: /images/posts/covers/dlthub.png
 
 dltHub 提供多種功能，專注於簡化數據加載和處理的流程，特別是針對 Python 開發者。他提供一個開源的 Python 程式庫，稱為 dlt（Data Load Tool），旨在幫助用戶輕鬆地從各種數據來源（如 API、文件和數據庫）加載數據，用戶無需設置傳統的 ETL 平台，只需使用簡單的 Python 代碼即可快速構建自定義數據管道，這使得數據處理變得更加高效。
 
-![dlthub workflow](https://dlthub.com/docs/assets/images/architecture-diagram-d146374c28081499d93f856effdab734.png)
+![dlthub workflow](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*OkZRsyge6gYN1dVFAaCoxQ.png)
 
 ## 範例
 
