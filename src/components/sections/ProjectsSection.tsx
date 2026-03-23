@@ -10,7 +10,7 @@ const featured = projects.filter((p) => p.featured).slice(0, 3);
 const WAVE_COLORS: Record<string, string> = {
   autollm: "#f59e0b",
   "nine-nine-pos": "#10b981",
-  "data-warehouse-clickhouse": "#3b82f6",
+  "fabric-data-pipeline": "#3b82f6",
 };
 
 interface ProjectsSectionProps {

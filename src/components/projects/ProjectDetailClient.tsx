@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -16,7 +17,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { projects } from "@/data/projects";
 import { cn } from "@/lib/utils";
-import type { Project } from "@/types";
+import type { Project, ProjectSection } from "@/types";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function toFileName(project: Project): string {
@@ -139,18 +140,19 @@ function FolderGroup({
 }
 
 // ── TypeScript const code block ───────────────────────────────────────────────
-function ConstBlock({
-  project,
-  lang,
-}: {
-  project: Project;
-  lang: string;
-}) {
+function ConstBlock({ project, lang }: { project: Project; lang: string }) {
   const [copied, setCopied] = useState(false);
 
-  const title = lang === "zh" && project.titleZh ? project.titleZh : project.title;
-  const desc = lang === "zh" && project.descriptionZh ? project.descriptionZh : project.description;
-  const longDesc = lang === "zh" && project.longDescriptionZh ? project.longDescriptionZh : project.longDescription;
+  const title =
+    lang === "zh" && project.titleZh ? project.titleZh : project.title;
+  const desc =
+    lang === "zh" && project.descriptionZh
+      ? project.descriptionZh
+      : project.description;
+  const longDesc =
+    lang === "zh" && project.longDescriptionZh
+      ? project.longDescriptionZh
+      : project.longDescription;
   const constName = toConstName(project);
 
   const plainText = [
@@ -265,16 +267,66 @@ function ConstBlock({
   );
 }
 
-// ── Detail panel ──────────────────────────────────────────────────────────────
-function DetailPanel({
-  project,
+// ── Section block ─────────────────────────────────────────────────────────────
+function SectionBlock({
+  section,
+  index,
   lang,
 }: {
-  project: Project;
+  section: ProjectSection;
+  index: number;
   lang: string;
 }) {
-  const title = lang === "zh" && project.titleZh ? project.titleZh : project.title;
-  const longDesc = lang === "zh" && project.longDescriptionZh ? project.longDescriptionZh : project.longDescription;
+  return (
+    <div className="mb-5">
+      <div className="flex items-center gap-2 mb-2.5">
+        <span className="w-5 h-5 rounded-full bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] text-[9px] font-bold shrink-0">
+          {index + 1}
+        </span>
+        <h3 className="text-[11px] font-semibold text-[var(--foreground)] tracking-wide">
+          {section.heading}
+        </h3>
+      </div>
+      <ul className="space-y-1.5 pl-7 mb-2">
+        {section.items.map((item, i) => (
+          <li
+            key={i}
+            className="flex gap-2 text-[12px] text-[var(--muted)] leading-relaxed"
+          >
+            <span className="mt-[6px] w-1 h-1 rounded-full bg-[var(--accent)]/50 shrink-0" />
+            {item}
+          </li>
+        ))}
+      </ul>
+      {section.benefits && section.benefits.length > 0 && (
+        <div className="ml-7 pl-3 border-l-2 border-[var(--accent)]/20 space-y-1">
+          <p className="text-[9px] font-bold tracking-widest uppercase text-[var(--accent)]/60 mb-1">
+            {lang === "zh" ? "效益" : "Benefits"}
+          </p>
+          {section.benefits.map((b, i) => (
+            <p
+              key={i}
+              className="text-[11px] text-[var(--accent)]/70 leading-relaxed"
+            >
+              {b}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Detail panel ──────────────────────────────────────────────────────────────
+function DetailPanel({ project, lang }: { project: Project; lang: string }) {
+  const title =
+    lang === "zh" && project.titleZh ? project.titleZh : project.title;
+  const longDesc =
+    lang === "zh" && project.longDescriptionZh
+      ? project.longDescriptionZh
+      : project.longDescription;
+  const sections =
+    lang === "zh" && project.sectionsZh ? project.sectionsZh : project.sections;
 
   return (
     <motion.div
@@ -329,7 +381,7 @@ function DetailPanel({
           </div>
         </div>
 
-        {/* Description */}
+        {/* Overview */}
         <div>
           <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-3">
             {lang === "zh" ? "專案概述" : "Overview"}
@@ -338,6 +390,43 @@ function DetailPanel({
             {longDesc}
           </p>
         </div>
+
+        {/* Project images */}
+        {project.images && project.images.length > 0 && (
+          <div>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-3">
+              {lang === "zh" ? "架構圖" : "Architecture"}
+            </p>
+            <div className="space-y-3">
+              {project.images.map((src, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg overflow-hidden border border-[var(--border)] bg-[var(--card)]"
+                >
+                  <Image
+                    src={src}
+                    alt={`${title} diagram ${i + 1}`}
+                    width={560}
+                    height={315}
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Rich sections */}
+        {sections && sections.length > 0 && (
+          <div>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-4">
+              {lang === "zh" ? "架構重點" : "Architecture Highlights"}
+            </p>
+            {sections.map((section, i) => (
+              <SectionBlock key={i} section={section} index={i} lang={lang} />
+            ))}
+          </div>
+        )}
 
         {/* Links */}
         {(project.links.github || project.links.demo) && (

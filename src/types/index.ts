@@ -1,3 +1,9 @@
+export interface ProjectSection {
+  heading: string;
+  items: string[];
+  benefits?: string[];
+}
+
 export interface Project {
   slug: string;
   title: string;
@@ -6,6 +12,9 @@ export interface Project {
   descriptionZh?: string;
   longDescription: string;
   longDescriptionZh?: string;
+  sections?: ProjectSection[];
+  sectionsZh?: ProjectSection[];
+  images?: string[];
   tech: string[];
   category: string;
   image: string;
