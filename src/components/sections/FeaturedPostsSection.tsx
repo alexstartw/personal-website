@@ -61,7 +61,7 @@ export function FeaturedPostsSection({ posts }: { posts: PostMeta[] }) {
 
   return (
     <section
-      id="posts"
+      id="blog"
       className="relative h-screen snap-start snap-always flex flex-col items-center justify-center overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -81,11 +81,13 @@ export function FeaturedPostsSection({ posts }: { posts: PostMeta[] }) {
           <div>
             <FadeIn>
               <span className="text-xs font-medium tracking-widest uppercase text-[var(--accent)] mb-3 block">
-                Writing
+                {t.posts.label}
               </span>
             </FadeIn>
             <FadeIn delay={0.1}>
-              <h2 className="text-3xl md:text-4xl font-bold">Featured Posts</h2>
+              <h2 className="text-3xl md:text-4xl font-bold">
+                {t.posts.heading}
+              </h2>
             </FadeIn>
           </div>
           <FadeIn delay={0.15}>

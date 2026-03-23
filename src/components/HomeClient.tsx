@@ -10,7 +10,14 @@ import { ContactSection } from "@/components/sections/ContactSection";
 import { SectionDots } from "@/components/ui/SectionDots";
 import type { PostMeta } from "@/lib/posts";
 
-const SECTIONS = ["hero", "experience", "projects", "posts", "skills", "contact"];
+const SECTIONS = [
+  "hero",
+  "experience",
+  "projects",
+  "blog",
+  "skills",
+  "contact",
+];
 
 export function HomeClient({ featuredPosts }: { featuredPosts: PostMeta[] }) {
   const [activeSection, setActiveSection] = useState("hero");
@@ -22,7 +29,9 @@ export function HomeClient({ featuredPosts }: { featuredPosts: PostMeta[] }) {
       const el = document.getElementById(id);
       if (!el) return;
       const observer = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(id);
+        },
         { threshold: 0.5 },
       );
       observer.observe(el);

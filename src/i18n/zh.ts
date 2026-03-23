@@ -65,6 +65,11 @@ export const zh: Locale = {
       Automation: "自動化",
     },
   },
+  posts: {
+    label: "文章精選",
+    heading: "精選文章",
+    view_all: "查看所有文章 →",
+  },
   contact: {
     label: "聯絡",
     heading: "與我聯繫",

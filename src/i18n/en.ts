@@ -48,6 +48,11 @@ export interface Locale {
     view_all: string;
     category_map: Record<string, string>;
   };
+  posts: {
+    label: string;
+    heading: string;
+    view_all: string;
+  };
   contact: {
     label: string;
     heading: string;
@@ -126,6 +131,11 @@ export const en: Locale = {
       Backend: "Backend",
       Automation: "Automation",
     },
+  },
+  posts: {
+    label: "Writing",
+    heading: "Featured Posts",
+    view_all: "View all posts →",
   },
   contact: {
     label: "Contact",

@@ -83,11 +83,8 @@ export function Navbar() {
     pathname.startsWith("/blog/");
 
   const handleDockClick = (id: string) => {
-    if (id === "blog") {
-      router.push("/blog");
-      return;
-    }
     if (isHome) scrollToSection(id);
+    else if (id === "blog") router.push("/blog");
     else router.push(`/#${id}`);
   };
 
