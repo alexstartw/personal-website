@@ -270,7 +270,9 @@ function BlogPageInner({
 
   const [openTabs, setOpenTabs] = useState<string[]>([]);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const [activeDockPanel, setActiveDockPanel] = useState<DockPanel | null>(null);
+  const [activeDockPanel, setActiveDockPanel] = useState<DockPanel | null>(
+    null,
+  );
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchDefaultQuery, setSearchDefaultQuery] = useState("");
 
@@ -312,7 +314,9 @@ function BlogPageInner({
       const newActive = next[next.length - 1] ?? null;
       setActiveSlug(newActive);
       if (newActive) {
-        router.replace(`/blog?slug=${encodeURIComponent(newActive)}`, { scroll: false });
+        router.replace(`/blog?slug=${encodeURIComponent(newActive)}`, {
+          scroll: false,
+        });
       } else {
         router.replace("/blog", { scroll: false });
       }
@@ -326,9 +330,11 @@ function BlogPageInner({
     <>
       {/* ── Full-height VS Code layout ─────────────────────────────────────── */}
       <div className="h-screen pt-14 flex flex-col bg-[var(--background)] overflow-hidden">
-
         {/* ── Main area: sidebar + editor ─────────────────────────────────── */}
-        <div className="flex-1 flex overflow-hidden min-h-0">
+        <div
+          className="flex-1 flex overflow-hidden min-h-0"
+          onClick={() => activeDockPanel && setActiveDockPanel(null)}
+        >
           {/* Left sidebar */}
           <aside className="w-52 shrink-0 border-r border-[var(--border)] bg-[var(--card)] flex flex-col overflow-hidden">
             <div className="px-3 py-2 border-b border-[var(--border)] flex items-center justify-between">
@@ -363,7 +369,9 @@ function BlogPageInner({
               activeSlug={activeSlug}
               onActivate={(slug) => {
                 setActiveSlug(slug);
-                router.replace(`/blog?slug=${encodeURIComponent(slug)}`, { scroll: false });
+                router.replace(`/blog?slug=${encodeURIComponent(slug)}`, {
+                  scroll: false,
+                });
               }}
               onClose={closeTab}
             />
@@ -371,10 +379,7 @@ function BlogPageInner({
             {/* Article + right outline */}
             <div className="flex-1 flex overflow-hidden min-h-0">
               {/* Stable scroll container — ref always valid */}
-              <div
-                ref={articleScrollRef}
-                className="flex-1 overflow-y-auto"
-              >
+              <div ref={articleScrollRef} className="flex-1 overflow-y-auto">
                 <AnimatePresence mode="wait">
                   {activeMeta ? (
                     <ArticleContent
@@ -406,6 +411,7 @@ function BlogPageInner({
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
               className="shrink-0 border-t border-[var(--border)] bg-[var(--card)] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
             >
               {activeDockPanel === "timeline" && (
                 <TimelinePanel
@@ -415,10 +421,7 @@ function BlogPageInner({
                 />
               )}
               {activeDockPanel === "categories" && (
-                <CategoriesPanel
-                  postMetas={postMetas}
-                  onSelect={() => {}}
-                />
+                <CategoriesPanel postMetas={postMetas} onSelect={() => {}} />
               )}
               {activeDockPanel === "tags" && (
                 <TagAnalysisPanel
