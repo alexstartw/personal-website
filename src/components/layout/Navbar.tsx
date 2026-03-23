@@ -46,6 +46,13 @@ const DOCK_ITEMS = [
     labelKey: "projects" as const,
   },
   {
+    id: "blog",
+    icon: BookOpen,
+    color: "text-orange-400",
+    bg: "hover:bg-orange-400/10",
+    labelKey: "blog" as const,
+  },
+  {
     id: "skills",
     icon: Code2,
     color: "text-purple-400",
@@ -58,13 +65,6 @@ const DOCK_ITEMS = [
     color: "text-green-400",
     bg: "hover:bg-green-400/10",
     labelKey: "contact" as const,
-  },
-  {
-    id: "blog",
-    icon: BookOpen,
-    color: "text-orange-400",
-    bg: "hover:bg-orange-400/10",
-    labelKey: "blog" as const,
   },
 ] as const;
 
