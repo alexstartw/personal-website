@@ -13,17 +13,17 @@ tags:
 cover: /images/posts/covers/ubuntu.jpg
 ---
 
-### 環境版本
+## 環境版本
 
 - Ubuntu 22.04
 - Docker 24.0.7
 - Postfix image : boky/postfix
 
-### 注意事項
+## 注意事項
 
 - 多個ip會需要有一個ip作為主ip，For server 連線
-### 設定流程
-#### 配ip至網卡上
+## 設定流程
+### 配ip至網卡上
 
 ```shell
 sudo nano /etc/netplan/00-installer-config.yaml
@@ -47,9 +47,9 @@ network:
 ```
 
 
-#### 建立docker network的ipvlan for container使用
+### 建立docker network的ipvlan for container使用
 
-##### 注意點 : 因涉及更深層的網路設定，要加強Network Layer 2的相關知識
+#### 注意點 : 因涉及更深層的網路設定，要加強Network Layer 2的相關知識
 
 ```shell
 sudo docker network create -d ipvlan 
@@ -60,14 +60,14 @@ sudo docker network create -d ipvlan
 my_ipvlan_network
 ```
 
-#### 建立container的方式
+### 建立container的方式
 
 - 指令建立
     - `sudo docker run -d --name postfix-41 --network my_ipvlan_network --ip 10.1.11.41 postfix-with-nano`
 - docker compose建立
     - 可以利用docker compose來建立多個container
 
-##### 檢查docker network與container的網路是否設定正確
+#### 檢查docker network與container的網路是否設定正確
 
 
 ```Shell
@@ -75,7 +75,7 @@ sudo docker network inspect my_ipvlan
 sudo docker inspect postfix_41
 ```
 
-##### 注意各postfix中的main.cf與master.cf的設定
+#### 注意各postfix中的main.cf與master.cf的設定
 
 - Opendkim
   - 於main.cf最後面加入相關內容

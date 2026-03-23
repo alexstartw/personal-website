@@ -506,7 +506,7 @@ airflow users create \
 
 #### Scheduler + Executor
 
-##### Scheduler
+#### Scheduler
 
 負責根據 DAG 的定義來決定什麼時候要觸發任務的執行。
 
@@ -520,7 +520,7 @@ airflow users create \
 
 4. 監控 DAG 的健康狀態：會在任務發生錯誤或超時的情況觸發重試或警報
 
-##### Executor
+#### Executor
 
 是一個 queue process，接收來自 Scheduler 分配的 Task，並將相關資訊存進 queue，再從 queue 中取出 Task 給閒置的 Worker 執行。
 
@@ -540,9 +540,9 @@ airflow users create \
 
     2. KubernetesExecutor：會在 Kubernetes 集群運行，每個任務會在自己的隔離環境中執行。
 
-##### Worker 介紹
+#### Worker 介紹
 
-###### 主要功能
+#### 主要功能
 
 - 執行任務：每個任務的執行結果會被回報給 Scheduler
 
@@ -550,7 +550,7 @@ airflow users create \
 
 - 監控任務執行情況
 
-###### 查看相關設定
+#### 查看相關設定
 
 - 不是以 docker-compose 安裝的：
 

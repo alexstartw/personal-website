@@ -14,7 +14,7 @@ Jinja 是一個 **Python 的模板引擎**，常用在 **Flask、dbt、Ansible**
 
 
 
-### 基本概念
+## 基本概念
 
 在 Jinja 的 function 可以分成幾類：
 
@@ -60,7 +60,7 @@ Jinja 是一個 **Python 的模板引擎**，常用在 **Flask、dbt、Ansible**
 
 
 
-### Jinja in dbt
+## Jinja in dbt
 
 以下介紹 dbt 內建的 function / macro，可以直接在 `{{  }}` 中進行使用
 

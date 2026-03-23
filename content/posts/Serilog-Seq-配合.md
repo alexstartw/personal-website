@@ -7,7 +7,7 @@ categories:
 cover: /images/posts/covers/seq.png
 ---
 
-### Serilog
+## Serilog
 安裝Nuget: 
 * Serilog
 * Serilog.AspNetCore
@@ -16,11 +16,11 @@ cover: /images/posts/covers/seq.png
 
 source : https://github.com/serilog/serilog
 
-### Seq log server
+## Seq log server
 安裝 Nuget:
 * Serilog.Sinks.Seq
 
-### 初始設定
+## 初始設定
 在 `Program.cs` 註冊 `Log.logger` 的使用
 ```csharp=
 Log.Logger = new LoggerConfiguration()
@@ -32,7 +32,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-#### 相對應的屬性設定
+### 相對應的屬性設定
 * `.ReadFrom.Configuration`: 可以將設定寫在 json 內，以方便控制與修改
 * `.WriteTo`
     * `WriteTo.Console`: 直接終端機輸出
@@ -80,7 +80,7 @@ Log.Logger = new LoggerConfiguration()
   }
 ```
 
-### 配合使用情境
+## 配合使用情境
 當想要在某個 class 紀錄 log 時，則需宣告出一個 logger
 ```csharp=
 private readonly ILogger _logger = Log.ForContext<XXXClass>();
@@ -89,7 +89,7 @@ private readonly ILogger _logger = Log.ForContext<XXXClass>();
 
 ![Serilog-Seq-配合-1.png](/images/posts/Serilog-Seq-配合/Serilog-Seq-配合-1.png)
 
-#### 一般使用情境:
+### 一般使用情境:
 可以使用以下六種不同等級來記錄 log
 ```csharp=
 _logger.Verbose("test verbose");
@@ -107,7 +107,7 @@ var MsgTemplate = "Message: {Info}";
 _logger.Information(MsgTemplate, "Function called")
 ```
 
-#### 資料型別 Formatting
+### 資料型別 Formatting
 * 小寫字母 - **:l**
 ```csharp=
 _logger.Information("Message: {Value:l}", "Hello World"); 
@@ -139,7 +139,7 @@ _logger.Information("Number: {Value:000}", 42);
 // 輸出："Number: 042"
 ```
 
-#### 巢狀資料使用:
+### 巢狀資料使用:
 型別包含: **Array**, **Object**, **多層Object**, **List**, **Dictionary**
 要在變數前加上'@'
 否則搜尋時無法搜尋到巢狀資料下的內容
@@ -148,7 +148,7 @@ string MsgTemplate = "Site: {@Site}, msg: {Info}"
 _logger.Information(MsgTemplate,new { Localhost = "localhost", Ip = "1.1.1.1"}, "Function called")
 ```
 
-#### Exception 問題處理
+### Exception 問題處理
 可以安裝Nuget:`Serilog.Exceptions`
 並加上相關設定
 ```csharp=
@@ -160,7 +160,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-#### Seq資料搜尋與分析
+### Seq資料搜尋與分析
 
 * 單純文字搜尋
 可以直接搜尋想要的純文字內容來進行搜尋
@@ -189,7 +189,7 @@ Log.Logger = new LoggerConfiguration()
 * Source: https://blog.csdn.net/u010690818/article/details/125589711
 * Source: https://medium.com/@niteshsinghal85/advance-logging-with-serilog-and-seq-in-net-9005a4a3d049
 
-#### 利用模板整理所需 template
+### 利用模板整理所需 template
 
 可利用此種方式，來整理出各場景所需 log 內容，也可提供客製化欄位
 有了共同模板，可以方便未來 log 查找，並且易於維護

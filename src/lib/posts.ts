@@ -9,6 +9,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import rehypePrettyCode from "rehype-pretty-code";
+import rehypeSection from "./rehype-section";
 
 const POSTS_DIR = path.join(process.cwd(), "content/posts");
 
@@ -71,6 +72,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
     .use(rehypeSlug)
+    .use(rehypeSection)
     .use(rehypePrettyCode, {
       theme: "github-dark",
       keepBackground: true,

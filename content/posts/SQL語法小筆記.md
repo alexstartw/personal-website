@@ -9,9 +9,9 @@ tags:
 cover: /images/posts/covers/sql.png
 ---
 
-### SQL語法小筆記
+## SQL語法小筆記
 ***
-#### 增加效能的語法
+### 增加效能的語法
 1. SELECT子句中避免使用 `SELECT *` 
 2. 以 `TRUNCATE TABLE` 取代 `DELETE FROM`
 3. 計算記錄比數時，以 `COUNT(*)` 取代 `COUNT(1)`

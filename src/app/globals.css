@@ -112,6 +112,31 @@ body {
   max-width: none;
 }
 
+/* ── Sectioned indentation (injected by rehype-section) ──────────────────── */
+/* h2 sections: full-width, no extra indent (top level) */
+.prose-blog .prose-section-2 {
+  margin-top: 0;
+}
+/* h3 sections: indented with subtle left guide */
+.prose-blog .prose-section-3 {
+  padding-left: 1.25rem;
+  border-left: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  margin-left: 0.1rem;
+  margin-top: 0.1em;
+}
+/* h4 sections: further indented, lighter guide */
+.prose-blog .prose-section-4 {
+  padding-left: 1rem;
+  border-left: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  margin-left: 0.1rem;
+  margin-top: 0.1em;
+}
+/* headings inside sections lose their top margin (section provides the gap) */
+.prose-blog .prose-section-3 > h3:first-child,
+.prose-blog .prose-section-4 > h4:first-child {
+  margin-top: 1.4em;
+}
+
 /* ── Headings — terminal annotation style ─────────────────────────────────── */
 .prose-blog h2,
 .prose-blog h3,

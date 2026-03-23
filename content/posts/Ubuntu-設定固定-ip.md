@@ -8,8 +8,8 @@ tags:
   - Ubuntu
 cover: /images/posts/covers/ubuntu.jpg
 ---
-### 舊版
-#### 若可以找到 '/etc/dhcpcd.conf'，則是用此方法
+## 舊版
+### 若可以找到 '/etc/dhcpcd.conf'，則是用此方法
 
 - 利用編輯器修改此文件
 ```shell
@@ -30,8 +30,8 @@ static domain_name_servers=192.168.0.1 #無線基地台地址**#Ctrl+O 存檔，
 sudo reboot
 ```
 
-### 新版
-#### 若無法找到，可使用 nmcli Command
+## 新版
+### 若無法找到，可使用 nmcli Command
 - 利用指令進行設定
 ```shell
 `sudo` `nmcli con mod` `"Your Connection Name"` `ipv4.addresses` `"192.168.1.100/24"` `ipv4.gateway` `"192.168.1.1"` `ipv4.dns` `"8.8.8.8"` `ipv4.method manual` 

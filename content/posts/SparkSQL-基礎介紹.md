@@ -125,7 +125,7 @@ SparkSQL 是 Apache Spark 的一個模組，用於處理結構化數據（Struct
 
 ## Demo-建立分散式架構
 
-#### 建立分散式架構
+### 建立分散式架構
 
 配合 `docker-compose` 建立一個 Spark-Master 跟一個 Spark-worker
 

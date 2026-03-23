@@ -43,7 +43,7 @@ Fabric 最核心的概念是 **OneLake**：
 
 **OneLake ＝ 統一資料底座**。
 
-##### What is Delta Lake?
+#### What is Delta Lake?
 
 > Delta Lake = 在 Data Lake 上加上一層「資料庫級」的 ACID 保證、Schema、版本管理、Time Travel，並且用 Parquet + Transaction Log 來實作。
 
@@ -73,7 +73,7 @@ Fabric 最核心的概念是 **OneLake**：
 
 
 
-##### Delta Lake 核心概念
+#### Delta Lake 核心概念
 
 1. 使用開放格式：**Parquet** + **Transaction Log**
 
@@ -87,7 +87,7 @@ Fabric 最核心的概念是 **OneLake**：
 
 6. Batch + Streaming 雙一致性（Unified）
 
-###### What is Data Lake?
+#### What is Data Lake?
 
 > 資料湖是一個能裝 *任何格式資料* 的大型存放區（object storage），強調成本低、彈性高，但本身沒有資料庫功能。
 
@@ -103,7 +103,7 @@ Fabric 最核心的概念是 **OneLake**：
 
 
 
-###### 核心理念
+#### 核心理念
 
 1. Schema-on-read（讀取時定義 schema）
 
@@ -174,7 +174,7 @@ Fabric 最核心的概念是 **OneLake**：
 
 
 
-###### Data Lake 問題
+#### Data Lake 問題
 
 資料湖是檔案系統，所以沒有資料庫的功能
 

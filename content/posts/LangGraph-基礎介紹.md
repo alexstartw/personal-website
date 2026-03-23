@@ -168,7 +168,7 @@ pip install langgraph
 
 若依照原先的方式，`Node` 回傳的 `partial state` 會將 key 值覆蓋，這邊可以配合 Python 本身的 `Annotated` 來實作。
 
-##### Annotated
+#### Annotated
 
 Python 的 `typing.Annotated` 只是對於「型態」的一種「註釋」，執行時預設並無影響。在 LangGraph 可搭配這個做法來外掛自己所需要的 function。
 
@@ -192,7 +192,7 @@ print(r)
 # 結果是 {'messages': [1, 2, 3, 4]}
 ```
 
-##### State 是 call-by-reference OR call-by-value？
+#### State 是 call-by-reference OR call-by-value？
 
 `state` 的傳遞方式是 **Call-by-Value（值傳遞）與 Call-by-Reference（引用傳遞）的混合**，但主要偏向 **Call-by-Value。**
 
