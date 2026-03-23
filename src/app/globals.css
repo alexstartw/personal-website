@@ -107,241 +107,179 @@ body {
 /* ── Blog article prose styles ───────────────────────────────────────────── */
 .prose-blog {
   color: var(--foreground);
-  font-size: 0.9375rem;
-  line-height: 1.8;
+  font-size: 0.875rem;
+  line-height: 1.65;
   max-width: none;
 }
 
-/* ── Sectioned indentation (injected by rehype-section) ──────────────────── */
-/* h2 sections: full-width, no extra indent (top level) */
-.prose-blog .prose-section-2 {
-  margin-top: 0;
-}
-/* h3 sections: indented with subtle left guide */
+/* ── Section indentation (injected by rehype-section) ───────────────────── */
 .prose-blog .prose-section-3 {
-  padding-left: 1.25rem;
-  border-left: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  margin-left: 0.1rem;
-  margin-top: 0.1em;
-}
-/* h4 sections: further indented, lighter guide */
-.prose-blog .prose-section-4 {
   padding-left: 1rem;
-  border-left: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
-  margin-left: 0.1rem;
-  margin-top: 0.1em;
+  border-left: 1px solid var(--border);
+  margin-left: 0.25rem;
 }
-/* headings inside sections lose their top margin (section provides the gap) */
-.prose-blog .prose-section-3 > h3:first-child,
-.prose-blog .prose-section-4 > h4:first-child {
-  margin-top: 1.4em;
+.prose-blog .prose-section-4 {
+  padding-left: 0.875rem;
+  border-left: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  margin-left: 0.25rem;
 }
 
-/* ── Headings — terminal annotation style ─────────────────────────────────── */
+/* ── Headings ────────────────────────────────────────────────────────────── */
 .prose-blog h2,
 .prose-blog h3,
 .prose-blog h4 {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--foreground);
-  line-height: 1.35;
-  margin-top: 2.2em;
-  margin-bottom: 0.7em;
-  position: relative;
+  line-height: 1.3;
+  margin-top: 1.75em;
+  margin-bottom: 0.5em;
 }
-/* h2: accent left bar + "##" monospace annotation inside padding */
 .prose-blog h2 {
-  font-size: 1.2rem;
-  padding-left: 2.6em;
+  font-size: 1.1rem;
+  padding-left: 0.75rem;
   border-left: 2px solid var(--accent);
 }
-.prose-blog h2::before {
-  content: "##";
-  font-family: ui-monospace, monospace;
-  font-size: 0.65em;
-  font-weight: 400;
-  color: var(--accent);
-  opacity: 0.55;
-  position: absolute;
-  left: 0.4em;
-  top: 0.22em;
-  letter-spacing: -0.02em;
-  user-select: none;
-}
-/* h3: thinner faded bar + "###" annotation inside padding */
 .prose-blog h3 {
-  font-size: 1.05rem;
-  padding-left: 3em;
-  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  font-size: 1rem;
+  color: color-mix(in srgb, var(--foreground) 85%, var(--accent));
 }
-.prose-blog h3::before {
-  content: "###";
-  font-family: ui-monospace, monospace;
-  font-size: 0.6em;
-  font-weight: 400;
-  color: var(--accent);
-  opacity: 0.4;
-  position: absolute;
-  left: 0.4em;
-  top: 0.25em;
-  letter-spacing: -0.02em;
-  user-select: none;
-}
-/* h4: ▸ prefix dot, no border */
 .prose-blog h4 {
-  font-size: 0.975rem;
-  padding-left: 1.4em;
-}
-.prose-blog h4::before {
-  content: "▸";
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   font-family: ui-monospace, monospace;
-  font-size: 0.75em;
-  color: var(--accent);
-  opacity: 0.7;
-  position: absolute;
-  left: 0.15em;
-  top: 0.18em;
-  user-select: none;
+}
+/* tighten top margin when heading directly follows another heading */
+.prose-blog h2 + h3,
+.prose-blog h3 + h4 {
+  margin-top: 0.75em;
 }
 
-/* ── Paragraph ─────────────────────────────────────────────────────────────── */
-.prose-blog p { margin-bottom: 1.2em; color: var(--foreground); }
-.prose-blog a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-.prose-blog a:hover { opacity: 0.8; }
-.prose-blog strong { font-weight: 600; color: var(--foreground); }
-.prose-blog em { font-style: italic; }
+/* ── Paragraph ───────────────────────────────────────────────────────────── */
+.prose-blog p { margin-bottom: 0.9em; color: var(--foreground); }
+.prose-blog a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.prose-blog a:hover { opacity: 0.75; }
+.prose-blog strong { font-weight: 600; }
+.prose-blog em { font-style: italic; color: var(--muted); }
 
-/* ── Lists — terminal chevron style ──────────────────────────────────────── */
+/* ── Lists ───────────────────────────────────────────────────────────────── */
 .prose-blog ul,
 .prose-blog ol {
-  margin: 0.9em 0 0.9em 0;
+  margin: 0.5em 0 0.75em 1.25rem;
   padding-left: 0;
-  list-style: none;
 }
-/* Top-level ul items — ▸ chevron */
-.prose-blog ul > li {
-  position: relative;
-  padding-left: 1.5em;
-  margin-bottom: 0.45em;
-  color: var(--foreground);
-}
-.prose-blog ul > li::before {
-  content: "▸";
-  position: absolute;
-  left: 0.1em;
-  top: 0;
-  font-family: ui-monospace, monospace;
-  font-size: 0.75em;
-  line-height: 2;
-  color: var(--accent);
-  opacity: 0.8;
-  user-select: none;
-}
-/* Nested ul — dash style */
-.prose-blog ul > li > ul {
-  margin: 0.3em 0 0.3em 0;
-}
-.prose-blog ul > li > ul > li::before {
-  content: "─";
-  font-size: 0.7em;
-  opacity: 0.45;
-  color: var(--muted);
-  line-height: 2.1;
-}
-/* Double-nested ul — dot */
-.prose-blog ul > li > ul > li > ul > li::before {
-  content: "·";
-  font-size: 1em;
-  opacity: 0.35;
-  line-height: 1.9;
-}
-/* Ordered list — accent monospace counter */
-.prose-blog ol {
-  counter-reset: prose-counter;
-}
+.prose-blog ul { list-style: none; }
+.prose-blog ol { list-style: none; counter-reset: prose-ol; }
+
+.prose-blog ul > li,
 .prose-blog ol > li {
+  margin-bottom: 0.3em;
   position: relative;
-  padding-left: 2em;
-  margin-bottom: 0.45em;
-  color: var(--foreground);
-  counter-increment: prose-counter;
+  padding-left: 1.1em;
 }
-.prose-blog ol > li::before {
-  content: counter(prose-counter, decimal-leading-zero);
+/* ul bullet — small filled circle in muted/accent */
+.prose-blog ul > li::before {
+  content: "•";
   position: absolute;
   left: 0;
-  top: 0;
-  font-family: ui-monospace, monospace;
-  font-size: 0.72em;
-  font-weight: 600;
-  line-height: 2;
   color: var(--accent);
-  opacity: 0.75;
-  user-select: none;
-  letter-spacing: -0.02em;
+  font-size: 0.8em;
+  line-height: 1.9;
+}
+/* nested ul — dash */
+.prose-blog ul ul > li::before {
+  content: "–";
+  color: var(--muted);
+  font-size: 0.85em;
+  line-height: 1.85;
+}
+/* double-nested ul — middot */
+.prose-blog ul ul ul > li::before {
+  content: "·";
+  color: var(--muted);
+  opacity: 0.6;
+  line-height: 1.85;
+}
+/* ol counter — monospace muted number */
+.prose-blog ol > li {
+  counter-increment: prose-ol;
+}
+.prose-blog ol > li::before {
+  content: counter(prose-ol) ".";
+  position: absolute;
+  left: -0.1em;
+  font-family: ui-monospace, monospace;
+  font-size: 0.78em;
+  line-height: 1.95;
+  color: var(--muted);
+  min-width: 1.5em;
+}
+/* nested lists spacing */
+.prose-blog li > ul,
+.prose-blog li > ol {
+  margin-top: 0.2em;
+  margin-bottom: 0.1em;
 }
 
-/* ── Blockquote ─────────────────────────────────────────────────────────────── */
+/* ── Blockquote ──────────────────────────────────────────────────────────── */
 .prose-blog blockquote {
-  border-left: 3px solid var(--accent);
-  padding: 0.6em 1em;
-  margin: 1.5em 0;
-  background: color-mix(in srgb, var(--accent) 5%, transparent);
-  border-radius: 0 4px 4px 0;
+  border-left: 2px solid var(--accent);
+  padding: 0.4em 0.875rem;
+  margin: 1em 0;
   color: var(--muted);
   font-style: italic;
 }
 .prose-blog hr {
   border: none;
   border-top: 1px solid var(--border);
-  margin: 2em 0;
+  margin: 1.5em 0;
 }
 .prose-blog img {
   max-width: 100%;
-  border-radius: 0.5rem;
+  border-radius: 4px;
   border: 1px solid var(--border);
-  margin: 1.5em auto;
+  margin: 1.25em auto;
   display: block;
 }
 
-/* ── Table — terminal SELECT output style ────────────────────────────────── */
+/* ── Table ───────────────────────────────────────────────────────────────── */
 .prose-blog table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.75em 0;
-  font-size: 0.84rem;
-  font-family: ui-monospace, monospace;
+  margin: 1.25em 0;
+  font-size: 0.8125rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 5px;
   overflow: hidden;
 }
 .prose-blog thead {
-  background: color-mix(in srgb, var(--accent) 8%, var(--card));
-  border-bottom: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
 }
 .prose-blog th {
-  padding: 0.55em 0.9em;
+  padding: 0.45em 0.8em;
   text-align: left;
-  font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.03em;
   white-space: nowrap;
 }
 .prose-blog td {
-  padding: 0.5em 0.9em;
+  padding: 0.4em 0.8em;
   text-align: left;
   border-top: 1px solid var(--border);
-  color: var(--foreground);
   vertical-align: top;
-  line-height: 1.6;
+  line-height: 1.55;
 }
-/* Zebra rows */
 .prose-blog tbody tr:nth-child(even) td {
-  background: color-mix(in srgb, var(--card) 60%, transparent);
+  background: color-mix(in srgb, var(--card) 50%, transparent);
 }
 .prose-blog tbody tr:hover td {
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
-  transition: background 0.12s ease;
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  transition: background 0.1s;
 }
 /* inline code */
 .prose-blog :not(pre) > code {
