@@ -19,11 +19,11 @@ import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
 const PAGE_LINKS = [
-  { href: "/", labelKey: "Home" },
-  { href: "/about", labelKey: "About" },
-  { href: "/experience", labelKey: "Experience" },
-  { href: "/projects", labelKey: "Projects" },
-  { href: "/blog", labelKey: "Blog" },
+  { href: "/", labelKey: "home" as const },
+  { href: "/about", labelKey: "about" as const },
+  { href: "/experience", labelKey: "experience" as const },
+  { href: "/projects", labelKey: "projects" as const },
+  { href: "/blog", labelKey: "blog" as const },
 ];
 
 function scrollToSection(id: string) {
@@ -91,6 +91,24 @@ export function Navbar() {
     else router.push(`/#${id}`);
   };
 
+  // On non-home pages that show the dock, derive activeSection from pathname
+  useEffect(() => {
+    if (isHome) return;
+    if (pathname === "/blog" || pathname.startsWith("/blog/")) {
+      setActiveSection("blog");
+    } else if (
+      pathname === "/experience" ||
+      pathname.startsWith("/experience/")
+    ) {
+      setActiveSection("experience");
+    } else if (pathname === "/projects" || pathname.startsWith("/projects/")) {
+      setActiveSection("projects");
+    } else {
+      setActiveSection("");
+    }
+  }, [pathname, isHome]);
+
+  // On homepage, track active section via IntersectionObserver
   useEffect(() => {
     if (!isHome) return;
     const observers: IntersectionObserver[] = [];
@@ -204,7 +222,9 @@ export function Navbar() {
                         }}
                       />
                     )}
-                    <span className="relative z-10">{link.labelKey}</span>
+                    <span className="relative z-10">
+                      {t.nav[link.labelKey]}
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -267,7 +287,7 @@ export function Navbar() {
                         : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--border)]",
                     )}
                   >
-                    {link.labelKey}
+                    {t.nav[link.labelKey]}
                   </Link>
                 </li>
               ))}

@@ -1,5 +1,6 @@
 export interface Locale {
   nav: {
+    home: string;
     about: string;
     skills: string;
     experience: string;
@@ -63,6 +64,7 @@ export interface Locale {
 
 export const en: Locale = {
   nav: {
+    home: "Home",
     about: "About",
     skills: "Skills",
     experience: "Experience",

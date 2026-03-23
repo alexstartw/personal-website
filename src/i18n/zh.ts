@@ -2,6 +2,7 @@ import type { Locale } from "./en";
 
 export const zh: Locale = {
   nav: {
+    home: "首頁",
     about: "關於我",
     skills: "技能",
     experience: "經歷",
