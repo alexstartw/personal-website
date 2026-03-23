@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { AnimatedText } from "@/components/ui/AnimatedText";
 import { FadeIn } from "@/components/ui/FadeIn";
@@ -47,16 +48,32 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
         <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* ── Left: hero content ─────────────────────────────── */}
           <div>
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--muted)]"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              {h.badge}
-            </motion.div>
+            {/* Avatar + badge row */}
+            <div className="flex items-center gap-4 mb-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-[var(--accent)]/30 shrink-0"
+              >
+                <Image
+                  src="/avatar.jpg"
+                  alt="Alex Lin"
+                  fill
+                  className="object-cover object-top"
+                  priority
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--muted)]"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                {h.badge}
+              </motion.div>
+            </div>
 
             {/* Name + title */}
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.08] mb-5">
@@ -101,27 +118,10 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
 
           {/* ── Right: about content ────────────────────────────── */}
           <div>
-            {/* Bio — skip education paragraph (bio3) */}
-            <div className="space-y-3 mb-6">
-              {([a.bio1, a.bio2, a.bio4] as string[]).map((bio, i) => (
-                <FadeIn key={i} delay={0.3 + i * 0.1}>
-                  <p
-                    className={`leading-relaxed text-sm ${
-                      i === 0
-                        ? "text-[var(--foreground)]"
-                        : "text-[var(--muted)]"
-                    }`}
-                  >
-                    {bio}
-                  </p>
-                </FadeIn>
-              ))}
-            </div>
-
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {a.stats.map((stat, i) => (
-                <FadeIn key={stat.label} delay={0.5 + i * 0.08} direction="up">
+                <FadeIn key={stat.label} delay={0.3 + i * 0.08} direction="up">
                   <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]/40 transition-colors h-full">
                     {stat.items ? (
                       <>
@@ -153,6 +153,23 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
                       </>
                     )}
                   </div>
+                </FadeIn>
+              ))}
+            </div>
+
+            {/* Bio — skip education paragraph (bio3) */}
+            <div className="space-y-3">
+              {([a.bio1, a.bio2, a.bio4] as string[]).map((bio, i) => (
+                <FadeIn key={i} delay={0.5 + i * 0.1}>
+                  <p
+                    className={`leading-relaxed text-sm ${
+                      i === 0
+                        ? "text-[var(--foreground)]"
+                        : "text-[var(--muted)]"
+                    }`}
+                  >
+                    {bio}
+                  </p>
                 </FadeIn>
               ))}
             </div>
