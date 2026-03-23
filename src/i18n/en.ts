@@ -1,10 +1,12 @@
 export interface Locale {
   nav: {
+    home: string;
     about: string;
     skills: string;
     experience: string;
     projects: string;
     contact: string;
+    blog: string;
   };
   hero: {
     badge: string;
@@ -46,6 +48,11 @@ export interface Locale {
     view_all: string;
     category_map: Record<string, string>;
   };
+  posts: {
+    label: string;
+    heading: string;
+    view_all: string;
+  };
   contact: {
     label: string;
     heading: string;
@@ -62,11 +69,13 @@ export interface Locale {
 
 export const en: Locale = {
   nav: {
+    home: "Home",
     about: "About",
     skills: "Skills",
     experience: "Experience",
     projects: "Projects",
     contact: "Contact",
+    blog: "Blog",
   },
   hero: {
     badge: "Available for opportunities",
@@ -122,6 +131,11 @@ export const en: Locale = {
       Backend: "Backend",
       Automation: "Automation",
     },
+  },
+  posts: {
+    label: "Writing",
+    heading: "Featured Posts",
+    view_all: "View all posts →",
   },
   contact: {
     label: "Contact",

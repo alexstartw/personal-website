@@ -4,7 +4,14 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Briefcase, FolderOpen, Code2, Mail, Home } from "lucide-react";
+import {
+  Briefcase,
+  FolderOpen,
+  Code2,
+  Mail,
+  Home,
+  BookOpen,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LangToggle } from "@/components/ui/LangToggle";
 import { AppleDock, AppleDockIcon } from "@/components/ui/apple-dock";
@@ -12,10 +19,11 @@ import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
 const PAGE_LINKS = [
-  { href: "/", labelKey: "Home" },
-  { href: "/about", labelKey: "About" },
-  { href: "/experience", labelKey: "Experience" },
-  { href: "/projects", labelKey: "Projects" },
+  { href: "/", labelKey: "home" as const },
+  { href: "/about", labelKey: "about" as const },
+  { href: "/experience", labelKey: "experience" as const },
+  { href: "/projects", labelKey: "projects" as const },
+  { href: "/blog", labelKey: "blog" as const },
 ];
 
 function scrollToSection(id: string) {
@@ -36,6 +44,13 @@ const DOCK_ITEMS = [
     color: "text-blue-400",
     bg: "hover:bg-blue-400/10",
     labelKey: "projects" as const,
+  },
+  {
+    id: "blog",
+    icon: BookOpen,
+    color: "text-orange-400",
+    bg: "hover:bg-orange-400/10",
+    labelKey: "blog" as const,
   },
   {
     id: "skills",
@@ -61,13 +76,36 @@ export function Navbar() {
   const [activeSection, setActiveSection] = useState<string>("");
   const isHome = pathname === "/";
   const showDock =
-    isHome || pathname === "/experience" || pathname.startsWith("/projects/");
+    isHome ||
+    pathname === "/experience" ||
+    pathname.startsWith("/projects/") ||
+    pathname === "/blog" ||
+    pathname.startsWith("/blog/");
 
   const handleDockClick = (id: string) => {
     if (isHome) scrollToSection(id);
+    else if (id === "blog") router.push("/blog");
     else router.push(`/#${id}`);
   };
 
+  // On non-home pages that show the dock, derive activeSection from pathname
+  useEffect(() => {
+    if (isHome) return;
+    if (pathname === "/blog" || pathname.startsWith("/blog/")) {
+      setActiveSection("blog");
+    } else if (
+      pathname === "/experience" ||
+      pathname.startsWith("/experience/")
+    ) {
+      setActiveSection("experience");
+    } else if (pathname === "/projects" || pathname.startsWith("/projects/")) {
+      setActiveSection("projects");
+    } else {
+      setActiveSection("");
+    }
+  }, [pathname, isHome]);
+
+  // On homepage, track active section via IntersectionObserver
   useEffect(() => {
     if (!isHome) return;
     const observers: IntersectionObserver[] = [];
@@ -181,7 +219,9 @@ export function Navbar() {
                         }}
                       />
                     )}
-                    <span className="relative z-10">{link.labelKey}</span>
+                    <span className="relative z-10">
+                      {t.nav[link.labelKey]}
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -244,7 +284,7 @@ export function Navbar() {
                         : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--border)]",
                     )}
                   >
-                    {link.labelKey}
+                    {t.nav[link.labelKey]}
                   </Link>
                 </li>
               ))}

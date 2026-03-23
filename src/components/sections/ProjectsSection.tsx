@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { FadeIn, FadeInStagger, FadeInItem } from "@/components/ui/FadeIn";
 import { WaveProjectCard } from "@/components/ui/wave-project-card";
@@ -13,11 +14,7 @@ const WAVE_COLORS: Record<string, string> = {
   "fabric-data-pipeline": "#3b82f6",
 };
 
-interface ProjectsSectionProps {
-  onScrollTo: (id: string) => void;
-}
-
-export function ProjectsSection({ onScrollTo }: ProjectsSectionProps) {
+export function ProjectsSection() {
   const { t, lang } = useLanguage();
   const p = t.projects;
 
@@ -40,12 +37,12 @@ export function ProjectsSection({ onScrollTo }: ProjectsSectionProps) {
             </FadeIn>
           </div>
           <FadeIn delay={0.15}>
-            <button
-              onClick={() => onScrollTo("contact")}
+            <Link
+              href="/projects"
               className="hidden md:flex items-center gap-1 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
             >
               {p.view_all}
-            </button>
+            </Link>
           </FadeIn>
         </div>
 

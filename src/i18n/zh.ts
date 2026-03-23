@@ -2,11 +2,13 @@ import type { Locale } from "./en";
 
 export const zh: Locale = {
   nav: {
+    home: "首頁",
     about: "關於我",
     skills: "技能",
     experience: "經歷",
     projects: "專案",
     contact: "聯絡",
+    blog: "部落格",
   },
   hero: {
     badge: "積極尋求工作機會",
@@ -62,6 +64,11 @@ export const zh: Locale = {
       Backend: "後端",
       Automation: "自動化",
     },
+  },
+  posts: {
+    label: "文章精選",
+    heading: "精選文章",
+    view_all: "查看所有文章 →",
   },
   contact: {
     label: "聯絡",
