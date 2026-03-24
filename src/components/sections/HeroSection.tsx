@@ -7,10 +7,23 @@ import { useLanguage } from "@/context/LanguageContext";
 import { GradientCard } from "@/components/ui/gradient-card";
 
 const TECH_STACK = [
-  "Apache Kafka", "dbt", "Apache Spark", "Airflow", "PostgreSQL",
-  "Python", "Go", "GenAI", "RAG", "Apache Flink",
-  "ClickHouse", "Kubernetes", "dlt", "LLM", "Terraform",
-  "FastAPI", "Redis",
+  "Apache Kafka",
+  "dbt",
+  "Apache Spark",
+  "Airflow",
+  "PostgreSQL",
+  "Python",
+  "Go",
+  "GenAI",
+  "RAG",
+  "Apache Flink",
+  "ClickHouse",
+  "Kubernetes",
+  "dlt",
+  "LLM",
+  "Terraform",
+  "FastAPI",
+  "Redis",
 ];
 
 const CARD_GRADIENTS = [
@@ -27,7 +40,7 @@ function RotatingKeyword({ keywords }: { keywords: string[] }) {
   useEffect(() => {
     const id = setInterval(
       () => setIndex((i) => (i + 1) % keywords.length),
-      2600
+      2600,
     );
     return () => clearInterval(id);
   }, [keywords.length]);
@@ -69,7 +82,6 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
     >
       {/* ── Main content ──────────────────────────────── */}
       <div className="flex-1 flex flex-col max-w-5xl mx-auto px-6 w-full pt-[3.5rem] min-h-0">
-
         {/* Meta bar: avatar · name · title chip · badge */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
@@ -102,10 +114,8 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
 
         {/* Two-column content */}
         <div className="flex-1 flex flex-col md:flex-row items-center gap-10 md:gap-16 py-5 min-h-0">
-
           {/* ── LEFT: headline + rotator + CTAs ─────── */}
           <div className="flex flex-col justify-center flex-1 min-w-0">
-
             {/* Big display headline */}
             <h1
               className="hero-display leading-[0.88] tracking-tight mb-5"
@@ -124,9 +134,6 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
                     }}
                   >
                     {line}
-                    {i === headlineLines.length - 1 && (
-                      <em className="not-italic text-[var(--accent)]">.</em>
-                    )}
                   </motion.span>
                 </span>
               ))}
@@ -157,14 +164,18 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
                 className="group flex items-center gap-1.5 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)] transition-colors duration-200"
               >
                 {h.cta_projects}
-                <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
+                <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
               </button>
               <button
                 onClick={() => onScrollTo("contact")}
                 className="group flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors duration-200"
               >
                 {h.cta_contact}
-                <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
+                <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
               </button>
             </motion.div>
           </div>
@@ -192,7 +203,6 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
               </motion.div>
             ))}
           </div>
-
         </div>
       </div>
 

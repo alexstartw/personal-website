@@ -43,7 +43,7 @@ export const zh: Locale = {
         items: ["半導體製造", "網路資安", "SaaS 軟體", "數據 / AI"],
       },
       { value: "NT$5000萬+", label: "創造專案收益" },
-      { value: "3+", label: "主導 GenAI 應用落地與資料平台規劃" },
+      { value: "10+", label: "主導 GenAI 應用落地與資料平台規劃" },
     ],
   },
   skills: {

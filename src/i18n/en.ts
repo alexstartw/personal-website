@@ -112,7 +112,7 @@ export const en: Locale = {
         items: ["Semiconductor", "Cybersecurity", "SaaS", "Data / AI"],
       },
       { value: "NT$50M+", label: "Revenue Generated" },
-      { value: "3+", label: "Led GenAI & Data Platform Projects" },
+      { value: "10+", label: "Led GenAI & Data Platform Projects" },
     ],
   },
   skills: {
