@@ -172,8 +172,8 @@ export function FocusRail({
 
             const isCenter = offset === 0;
             const dist = Math.abs(offset);
-            const xOffset = offset * 280;
-            const zOffset = -dist * 160;
+            const xOffset = offset * 320;
+            const zOffset = -dist * 140;
             const scale = isCenter ? 1 : 0.82;
             const rotateY = offset * -18;
             const opacity = isCenter ? 1 : Math.max(0.08, 1 - dist * 0.52);
@@ -189,8 +189,8 @@ export function FocusRail({
                   isCenter ? "z-20" : "z-10",
                 ].join(" ")}
                 style={{
-                  width: 200,
-                  aspectRatio: "3/4",
+                  width: 280,
+                  aspectRatio: "4/3",
                   transformStyle: "preserve-3d",
                 }}
                 initial={false}

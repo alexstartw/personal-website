@@ -113,10 +113,19 @@ function ScrambledHeroHeadline({ phrases }: { phrases: string[] }) {
     setReady(true);
   }, []);
 
+  // When language switches, reset each line to phrase 0 of the new phrases
+  useEffect(() => {
+    lineRefs.current.forEach((el, i) => {
+      if (el) el.innerText = splitPhrases[0][i] ?? "";
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phrases]);
+
   useEffect(() => {
     if (!ready) return;
     let cancelled = false;
-    let counter = 0;
+    // Start at 1 — phrase 0 is already rendered in the DOM
+    let counter = 1;
 
     const next = () => {
       if (cancelled) return;
@@ -130,12 +139,15 @@ function ScrambledHeroHeadline({ phrases }: { phrases: string[] }) {
       counter = (counter + 1) % splitPhrases.length;
     };
 
-    next();
+    // Wait a beat before the first scramble so initial text is readable
+    const timer = setTimeout(next, 3200);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
+    // Re-run when language switches so stale closures don't persist
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+  }, [ready, phrases]);
 
   return (
     <h1
@@ -175,7 +187,6 @@ function RotatingKeyword({ keywords }: { keywords: string[] }) {
         <motion.span
           key={index}
           className="absolute inset-0 text-base font-semibold text-[var(--accent)]"
-          style={{ fontFamily: "var(--font-display, Georgia, serif)" }}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -16 }}
