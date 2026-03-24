@@ -26,6 +26,20 @@
   font-size: clamp(3rem, 8vw + 0.5rem, 9rem);
 }
 
+/* Gradient card blob animation */
+@keyframes blob {
+  0%, 100% { transform: translateY(8px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-blob {
+  animation: blob 2s ease-in-out infinite;
+}
+
+.animation-delay-1000 {
+  animation-delay: -1s;
+}
+
 /* Marquee animation */
 @keyframes marquee {
   from {

@@ -13,6 +13,7 @@ export interface Locale {
     name: string;
     title: string;
     headline: string;
+    rotating_keywords: string[];
     subtitle: string;
     cta_projects: string;
     cta_contact: string;
@@ -82,7 +83,14 @@ export const en: Locale = {
     badge: "Available for opportunities",
     name: "Li-Yu Alex Lin",
     title: "Data Engineer",
-    headline: "Turning data\ninto business\nvalue.",
+    headline: "Turning data\ninto business\nvalue",
+    rotating_keywords: [
+      "event-driven pipelines",
+      "TB-scale data systems",
+      "GenAI & RAG applications",
+      "cloud-native platforms",
+      "real-time analytics",
+    ],
     subtitle:
       "5+ years building data-intensive systems in event-driven architectures and cloud-native environments. Specializing in scalable data solutions and GenAI applications.",
     cta_projects: "View Projects",
