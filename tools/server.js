@@ -158,6 +158,16 @@ async function handleSavePost(req, res) {
   json(res, { ok: true, path: dest });
 }
 
+function handleGetPost(req, res) {
+  const { query } = url.parse(req.url, true);
+  const slug = query.slug;
+  if (!slug) return json(res, { error: "Missing slug" }, 400);
+  const filepath = path.join(POSTS_DIR, `${slug}.md`);
+  if (!fs.existsSync(filepath)) return json(res, { error: "Not found" }, 404);
+  const raw = fs.readFileSync(filepath, "utf-8");
+  json(res, { raw });
+}
+
 async function handleDownloadImage(req, res) {
   const buf = await readBody(req);
   const { imgUrl, type, filename: customFilename } = JSON.parse(buf.toString());
@@ -204,12 +214,34 @@ const server = http.createServer(async (req, res) => {
       return handleGetPosts(res);
     if (pathname === "/api/covers" && req.method === "GET")
       return handleGetCovers(res);
+    if (pathname === "/api/post" && req.method === "GET")
+      return handleGetPost(req, res);
     if (pathname === "/api/save" && req.method === "POST")
       return await handleSavePost(req, res);
     if (pathname === "/api/download-image" && req.method === "POST")
       return await handleDownloadImage(req, res);
     if (pathname === "/api/upload-image" && req.method === "POST")
       return await handleUploadImage(req, res);
+
+    // Serve static files from /public/
+    if (pathname.startsWith("/public/")) {
+      const filePath = path.join(ROOT, pathname);
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        const ext = path.extname(filePath).toLowerCase();
+        const mime =
+          {
+            ".png": "image/png",
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".webp": "image/webp",
+            ".gif": "image/gif",
+            ".svg": "image/svg+xml",
+          }[ext] || "application/octet-stream";
+        res.writeHead(200, { "Content-Type": mime });
+        fs.createReadStream(filePath).pipe(res);
+        return;
+      }
+    }
 
     res.writeHead(404);
     res.end("Not found");

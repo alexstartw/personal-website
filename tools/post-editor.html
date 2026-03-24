@@ -371,10 +371,21 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
 
 <!-- Top bar -->
 <div class="topbar">
-  <div class="topbar-title">✦ <span>Post Editor</span></div>
+  <div class="topbar-title">✦ <span>Post Editor</span> <span id="editing-label" style="font-weight:400;color:var(--muted);font-size:12px;margin-left:8px;"></span></div>
+  <button class="btn" onclick="toggleOpenPanel()">📂 Open Post</button>
+  <button class="btn" onclick="newPost()">＋ New</button>
   <button class="btn" onclick="toggleTheme()">🌙 Theme</button>
   <button class="btn" onclick="openImageModal()">🖼 Insert Image</button>
-  <button class="btn btn-primary" onclick="savePost()">💾 Save Post</button>
+  <button class="btn btn-primary" onclick="savePost()">💾 Save</button>
+</div>
+
+<!-- Open Post Panel -->
+<div id="open-panel" style="display:none; position:fixed; top:41px; left:0; right:0; z-index:50;
+  background:var(--card); border-bottom:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.12); padding:12px 16px;">
+  <input type="text" id="post-search" placeholder="Search posts..." oninput="filterPosts()"
+    style="width:100%; margin-bottom:10px; padding:7px 10px; border:1px solid var(--border); border-radius:6px;
+    background:var(--background); color:var(--foreground); font-size:12px; outline:none;" />
+  <div id="post-list" style="max-height:260px; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:4px;"></div>
 </div>
 
 <!-- Layout -->
@@ -519,6 +530,9 @@ let tags = [];
 let existingSlugs = [];
 let allCategories = [];
 let allTags = [];
+let allPosts = [];
+let editingSlug = null;   // null = new post, string = editing existing
+let panelLoaded = false;
 
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init() {
@@ -528,6 +542,7 @@ async function init() {
   // Load existing posts metadata
   try {
     const posts = await fetch("/api/posts").then(r => r.json());
+    allPosts = posts;
     existingSlugs = posts.map(p => p.slug);
     allCategories = [...new Set(posts.flatMap(p => p.categories))].filter(Boolean);
     allTags = [...new Set(posts.flatMap(p => p.tags))].filter(Boolean);
@@ -576,7 +591,10 @@ function checkSlug() {
   const fn = document.getElementById("fm-filename").value.replace(/\.md$/, "");
   const el = document.getElementById("slug-status");
   if (!fn) { el.textContent = "—"; el.style.color = "var(--muted)"; return; }
-  if (existingSlugs.includes(fn)) {
+  if (editingSlug && editingSlug === fn) {
+    el.textContent = `✎ Editing "${fn}.md"`;
+    el.style.color = "var(--accent)";
+  } else if (existingSlugs.includes(fn)) {
     el.textContent = `⚠ "${fn}.md" already exists — will overwrite`;
     el.style.color = "#f59e0b";
   } else {
@@ -873,6 +891,164 @@ async function savePost() {
     setStatus(`✗ ${e.message}`, true);
     toast("✗ Cannot reach server", "err");
   }
+}
+
+// ── Open Post panel ────────────────────────────────────────────────────────
+function toggleOpenPanel() {
+  const panel = document.getElementById("open-panel");
+  const isOpen = panel.style.display !== "none";
+  panel.style.display = isOpen ? "none" : "block";
+  if (!isOpen) {
+    document.getElementById("post-search").value = "";
+    renderPostList(allPosts);
+    document.getElementById("post-search").focus();
+    // Close panel when clicking outside
+    setTimeout(() => document.addEventListener("click", closePanelOutside, { once: true }), 0);
+  }
+}
+
+function closePanelOutside(e) {
+  const panel = document.getElementById("open-panel");
+  const btn = document.querySelector('[onclick="toggleOpenPanel()"]');
+  if (!panel.contains(e.target) && e.target !== btn) {
+    panel.style.display = "none";
+  } else {
+    document.addEventListener("click", closePanelOutside, { once: true });
+  }
+}
+
+function renderPostList(posts) {
+  const list = document.getElementById("post-list");
+  if (!posts.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 4px;">No posts found</div>';
+    return;
+  }
+  list.innerHTML = posts.map(p => `
+    <div onclick="loadPost('${p.slug}')"
+      style="padding:8px 10px; border-radius:6px; cursor:pointer; border:1px solid var(--border);
+             background:var(--background); transition:all 0.12s;"
+      onmouseover="this.style.borderColor='var(--accent)'"
+      onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:12px;font-weight:500;color:var(--foreground);line-height:1.3;margin-bottom:2px;">
+        ${p.title || p.slug}
+      </div>
+      <div style="font-size:10px;color:var(--muted);font-family:ui-monospace,monospace">${p.slug}.md</div>
+    </div>
+  `).join("");
+}
+
+function filterPosts() {
+  const q = document.getElementById("post-search").value.toLowerCase();
+  const filtered = allPosts.filter(p =>
+    (p.title || "").toLowerCase().includes(q) || p.slug.toLowerCase().includes(q)
+  );
+  renderPostList(filtered);
+}
+
+async function loadPost(slug) {
+  document.getElementById("open-panel").style.display = "none";
+  setStatus("Loading...");
+  try {
+    const data = await fetch(`/api/post?slug=${encodeURIComponent(slug)}`).then(r => r.json());
+    if (data.error) { setStatus(`✗ ${data.error}`, true); return; }
+    const { fm, body } = parseFrontmatter(data.raw);
+
+    // Populate form fields
+    document.getElementById("fm-title").value = fm.title || "";
+    document.getElementById("fm-filename").value = slug + ".md";
+    document.getElementById("fm-date").value = fm.date ? fm.date.replace(/^["']|["']$/g, "") : "";
+    document.getElementById("fm-desc").value = fm.description || "";
+    document.getElementById("fm-cover").value = fm.cover || "";
+
+    // Cover preview
+    if (fm.cover) {
+      document.getElementById("cover-preview-img").src = `http://localhost:3001/public${fm.cover}`;
+      document.getElementById("cover-preview").style.display = "block";
+    } else {
+      document.getElementById("cover-preview").style.display = "none";
+    }
+
+    // Tags & categories
+    categories = fm.categories || [];
+    tags = fm.tags || [];
+    renderTags("cat");
+    renderTags("tag");
+
+    // Body
+    document.getElementById("editor").value = body;
+    renderPreview();
+
+    // Lock filename & set edit mode
+    editingSlug = slug;
+    document.getElementById("fm-filename").readOnly = true;
+    document.getElementById("fm-filename").style.opacity = "0.6";
+    document.getElementById("editing-label").textContent = `✎ ${slug}.md`;
+    checkSlug();
+    setStatus(`✓ Loaded: ${slug}.md`);
+    toast(`✓ Loaded: ${slug}.md`, "ok");
+  } catch(e) {
+    setStatus(`✗ ${e.message}`, true);
+  }
+}
+
+function parseFrontmatter(raw) {
+  const lines = raw.split("\n");
+  const fm = {};
+  let inFront = false, ended = false, bodyStart = 0;
+  let readingKey = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.trim() === "---") {
+      if (!inFront) { inFront = true; continue; }
+      else { ended = true; bodyStart = i + 1; break; }
+    }
+    if (!inFront) continue;
+
+    // List items
+    if (line.startsWith("  - ")) {
+      const val = line.replace("  - ", "").trim();
+      if (readingKey === "categories") { fm.categories = fm.categories || []; fm.categories.push(val); }
+      else if (readingKey === "tags") { fm.tags = fm.tags || []; fm.tags.push(val); }
+      continue;
+    }
+
+    // key: value
+    const colon = line.indexOf(":");
+    if (colon === -1) continue;
+    const key = line.slice(0, colon).trim();
+    const val = line.slice(colon + 1).trim().replace(/^["']|["']$/g, "");
+    fm[key] = val;
+    readingKey = key;
+  }
+
+  const body = lines.slice(bodyStart).join("\n").replace(/^\n/, "");
+  return { fm, body };
+}
+
+// ── New Post ────────────────────────────────────────────────────────────────
+function newPost() {
+  // Clear all fields
+  document.getElementById("fm-title").value = "";
+  document.getElementById("fm-filename").value = "";
+  document.getElementById("fm-filename").readOnly = false;
+  document.getElementById("fm-filename").style.opacity = "1";
+  document.getElementById("fm-date").value = formatDate(new Date());
+  document.getElementById("fm-desc").value = "";
+  document.getElementById("fm-cover").value = "";
+  document.getElementById("cover-url").value = "";
+  document.getElementById("cover-filename").value = "";
+  document.getElementById("cover-preview").style.display = "none";
+  document.getElementById("editor").value = "";
+  document.getElementById("preview").innerHTML = "";
+  document.getElementById("editing-label").textContent = "";
+  document.getElementById("slug-status").textContent = "—";
+  document.getElementById("slug-status").style.color = "var(--muted)";
+  categories = []; tags = [];
+  renderTags("cat"); renderTags("tag");
+  editingSlug = null;
+  setStatus("Ready");
+  document.getElementById("fm-title").focus();
 }
 
 // ── Theme ──────────────────────────────────────────────────────────────────
