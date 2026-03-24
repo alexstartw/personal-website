@@ -417,8 +417,10 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
     <div class="sidebar-section">
       <div class="sidebar-section-title">Cover Image</div>
       <label>Image URL</label>
+      <input type="text" id="cover-url" placeholder="https://..." oninput="onCoverUrlChange()" />
+      <label style="margin-top:6px">儲存檔名</label>
       <div class="cover-row">
-        <input type="text" id="cover-url" placeholder="https://..." />
+        <input type="text" id="cover-filename" placeholder="my-cover.png" style="font-family:ui-monospace,monospace;font-size:11px" />
         <button class="btn btn-sm" onclick="downloadCover()">⬇ 下載</button>
       </div>
       <div class="cover-preview" id="cover-preview">
@@ -720,15 +722,27 @@ async function uploadBlob(blob) {
 }
 
 // ── Cover download ─────────────────────────────────────────────────────────
+function onCoverUrlChange() {
+  const imgUrl = document.getElementById("cover-url").value.trim();
+  if (!imgUrl) return;
+  try {
+    const parsed = new URL(imgUrl);
+    const auto = parsed.pathname.split("/").pop().split("?")[0];
+    const filenameEl = document.getElementById("cover-filename");
+    if (!filenameEl.value) filenameEl.value = auto;
+  } catch(e) {}
+}
+
 async function downloadCover() {
   const imgUrl = document.getElementById("cover-url").value.trim();
   if (!imgUrl) return;
+  const customName = document.getElementById("cover-filename").value.trim();
   setStatus("Downloading cover...");
   try {
     const res = await fetch("/api/download-image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imgUrl, type: "cover" }),
+      body: JSON.stringify({ imgUrl, type: "cover", filename: customName || undefined }),
     });
     const data = await res.json();
     if (data.ok) {

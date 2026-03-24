@@ -43,19 +43,27 @@ function json(res, data, status = 200) {
   res.end(body);
 }
 
-function downloadUrl(imgUrl, destDir) {
+function downloadUrl(imgUrl, destDir, customFilename) {
   return new Promise((resolve, reject) => {
     const parsed = new URL(imgUrl);
-    let filename = path.basename(parsed.pathname).split("?")[0];
-    if (!filename || !filename.includes(".")) filename = `image-${Date.now()}.png`;
+    let filename =
+      customFilename || path.basename(parsed.pathname).split("?")[0];
+    if (!filename || !filename.includes("."))
+      filename = `image-${Date.now()}.png`;
     const destPath = path.join(destDir, filename);
 
     const proto = parsed.protocol === "https:" ? https : require("http");
     proto
       .get(imgUrl, (res) => {
         // Follow redirects
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          return downloadUrl(res.headers.location, destDir).then(resolve).catch(reject);
+        if (
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
+          return downloadUrl(res.headers.location, destDir)
+            .then(resolve)
+            .catch(reject);
         }
         if (res.statusCode !== 200) {
           return reject(new Error(`HTTP ${res.statusCode}`));
@@ -86,16 +94,33 @@ function handleGetPosts(res) {
     const meta = { slug: f.replace(/\.md$/, "") };
     // Quick frontmatter parse
     let inFront = false;
-    const cats = [], tags = [];
+    const cats = [],
+      tags = [];
     for (const line of lines) {
-      if (line.trim() === "---") { if (!inFront) { inFront = true; continue; } else break; }
+      if (line.trim() === "---") {
+        if (!inFront) {
+          inFront = true;
+          continue;
+        } else break;
+      }
       if (!inFront) continue;
-      if (line.startsWith("title:")) meta.title = line.replace("title:", "").trim().replace(/^["']|["']$/g, "");
+      if (line.startsWith("title:"))
+        meta.title = line
+          .replace("title:", "")
+          .trim()
+          .replace(/^["']|["']$/g, "");
       if (line.startsWith("categories:") || line.startsWith("tags:")) {
         meta._reading = line.startsWith("categories:") ? "cat" : "tag";
       }
-      if (line.startsWith("  - ") && meta._reading === "cat") cats.push(line.replace("  - ", "").replace(/^\[|\]$/g, "").trim());
-      if (line.startsWith("  - ") && meta._reading === "tag") tags.push(line.replace("  - ", "").trim());
+      if (line.startsWith("  - ") && meta._reading === "cat")
+        cats.push(
+          line
+            .replace("  - ", "")
+            .replace(/^\[|\]$/g, "")
+            .trim(),
+        );
+      if (line.startsWith("  - ") && meta._reading === "tag")
+        tags.push(line.replace("  - ", "").trim());
     }
     meta.categories = cats;
     meta.tags = tags;
@@ -107,10 +132,14 @@ function handleGetPosts(res) {
 
 function handleGetCovers(res) {
   const covers = fs.existsSync(COVERS_DIR)
-    ? fs.readdirSync(COVERS_DIR).filter((f) => /\.(png|jpe?g|webp|gif|svg)$/i.test(f))
+    ? fs
+        .readdirSync(COVERS_DIR)
+        .filter((f) => /\.(png|jpe?g|webp|gif|svg)$/i.test(f))
     : [];
   const contentImgs = fs.existsSync(CONTENT_IMG_DIR)
-    ? fs.readdirSync(CONTENT_IMG_DIR).filter((f) => /\.(png|jpe?g|webp|gif|svg)$/i.test(f))
+    ? fs
+        .readdirSync(CONTENT_IMG_DIR)
+        .filter((f) => /\.(png|jpe?g|webp|gif|svg)$/i.test(f))
     : [];
   json(res, { covers, contentImgs });
 }
@@ -118,7 +147,8 @@ function handleGetCovers(res) {
 async function handleSavePost(req, res) {
   const buf = await readBody(req);
   const { filename, content } = JSON.parse(buf.toString());
-  if (!filename || !content) return json(res, { error: "Missing filename or content" }, 400);
+  if (!filename || !content)
+    return json(res, { error: "Missing filename or content" }, 400);
   const safe = filename.endsWith(".md") ? filename : `${filename}.md`;
   const dest = path.join(POSTS_DIR, safe);
   if (fs.existsSync(dest)) {
@@ -130,11 +160,11 @@ async function handleSavePost(req, res) {
 
 async function handleDownloadImage(req, res) {
   const buf = await readBody(req);
-  const { imgUrl, type } = JSON.parse(buf.toString());
+  const { imgUrl, type, filename: customFilename } = JSON.parse(buf.toString());
   if (!imgUrl) return json(res, { error: "Missing imgUrl" }, 400);
   const destDir = type === "cover" ? COVERS_DIR : CONTENT_IMG_DIR;
   try {
-    const { filename } = await downloadUrl(imgUrl, destDir);
+    const { filename } = await downloadUrl(imgUrl, destDir, customFilename);
     const publicPath =
       type === "cover"
         ? `/images/posts/covers/${filename}`
@@ -161,17 +191,25 @@ const server = http.createServer(async (req, res) => {
 
   // CORS preflight
   if (req.method === "OPTIONS") {
-    res.writeHead(204, { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*" });
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "*",
+    });
     return res.end();
   }
 
   try {
     if (pathname === "/" || pathname === "/editor") return handleEditor(res);
-    if (pathname === "/api/posts" && req.method === "GET") return handleGetPosts(res);
-    if (pathname === "/api/covers" && req.method === "GET") return handleGetCovers(res);
-    if (pathname === "/api/save" && req.method === "POST") return await handleSavePost(req, res);
-    if (pathname === "/api/download-image" && req.method === "POST") return await handleDownloadImage(req, res);
-    if (pathname === "/api/upload-image" && req.method === "POST") return await handleUploadImage(req, res);
+    if (pathname === "/api/posts" && req.method === "GET")
+      return handleGetPosts(res);
+    if (pathname === "/api/covers" && req.method === "GET")
+      return handleGetCovers(res);
+    if (pathname === "/api/save" && req.method === "POST")
+      return await handleSavePost(req, res);
+    if (pathname === "/api/download-image" && req.method === "POST")
+      return await handleDownloadImage(req, res);
+    if (pathname === "/api/upload-image" && req.method === "POST")
+      return await handleUploadImage(req, res);
 
     res.writeHead(404);
     res.end("Not found");
