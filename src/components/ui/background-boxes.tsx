@@ -43,7 +43,11 @@ interface Spark {
   repeatDelay: number;
 }
 
-export function BackgroundBoxes() {
+export function BackgroundBoxes({
+  interactive = true,
+}: {
+  interactive?: boolean;
+}) {
   const [sparks, setSparks] = useState<Spark[]>([]);
 
   // Client-only to avoid hydration mismatch
@@ -61,7 +65,10 @@ export function BackgroundBoxes() {
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden z-0" style={{ pointerEvents: "none" }}>
+    <div
+      className="absolute inset-0 overflow-hidden z-0"
+      style={{ pointerEvents: "none" }}
+    >
       {/* Isometric skewed container */}
       <div
         className="absolute"
@@ -72,8 +79,8 @@ export function BackgroundBoxes() {
           height: ROWS * CELL_H,
           transform:
             "translate(-50%,-50%) skewX(-48deg) skewY(14deg) scale(0.675)",
-          // Enable pointer events only on this layer
-          pointerEvents: "auto",
+          // Enable pointer events only when interactive
+          pointerEvents: interactive ? "auto" : "none",
         }}
       >
         {/* Flat CSS grid for lines — zero extra DOM nodes */}
@@ -89,54 +96,60 @@ export function BackgroundBoxes() {
           }}
         />
 
-        {/* Interactive cells — transparent, handle hover */}
-        <div
-          className="absolute inset-0"
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${COLS}, ${CELL_W}px)`,
-          }}
-        >
-          {Array.from({ length: ROWS * COLS }, (_, idx) => {
-            const col = idx % COLS;
-            const row = Math.floor(idx / COLS);
-            const showPlus = col % 2 === 0 && row % 2 === 0;
-            return (
-              <div
-                key={idx}
-                style={{ width: CELL_W, height: CELL_H, position: "relative" }}
-                onMouseEnter={onEnter}
-                onMouseLeave={onLeave}
-              >
-                {showPlus && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="pointer-events-none"
-                    style={{
-                      position: "absolute",
-                      top: -7,
-                      left: -11,
-                      width: 22,
-                      height: 14,
-                      color: "var(--border)",
-                      opacity: 0.55,
-                    }}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 6v12m6-6H6"
-                    />
-                  </svg>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        {/* Interactive cells — only rendered when interactive=true */}
+        {interactive && (
+          <div
+            className="absolute inset-0"
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${COLS}, ${CELL_W}px)`,
+            }}
+          >
+            {Array.from({ length: ROWS * COLS }, (_, idx) => {
+              const col = idx % COLS;
+              const row = Math.floor(idx / COLS);
+              const showPlus = col % 2 === 0 && row % 2 === 0;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    width: CELL_W,
+                    height: CELL_H,
+                    position: "relative",
+                  }}
+                  onMouseEnter={onEnter}
+                  onMouseLeave={onLeave}
+                >
+                  {showPlus && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="pointer-events-none"
+                      style={{
+                        position: "absolute",
+                        top: -7,
+                        left: -11,
+                        width: 22,
+                        height: 14,
+                        color: "var(--border)",
+                        opacity: 0.55,
+                      }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 6v12m6-6H6"
+                      />
+                    </svg>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Auto-sparkle cells (framer-motion, 22 only) */}
         {sparks.map((s, i) => (
