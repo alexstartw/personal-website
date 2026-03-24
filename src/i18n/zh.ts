@@ -14,6 +14,7 @@ export const zh: Locale = {
     badge: "積極尋求工作機會",
     name: "林力宇 Alex Lin",
     title: "資深數據工程師",
+    headline: "將數據轉化\n為商業\n價值。",
     subtitle:
       "5 年以上經驗，專注於事件驅動架構與雲端原生環境中的數據密集型系統開發，擅長可擴展的數據解決方案與 GenAI 應用。",
     cta_projects: "查看專案",

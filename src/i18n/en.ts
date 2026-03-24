@@ -12,6 +12,7 @@ export interface Locale {
     badge: string;
     name: string;
     title: string;
+    headline: string;
     subtitle: string;
     cta_projects: string;
     cta_contact: string;
@@ -81,6 +82,7 @@ export const en: Locale = {
     badge: "Available for opportunities",
     name: "Li-Yu Alex Lin",
     title: "Data Engineer",
+    headline: "Turning data\ninto business\nvalue.",
     subtitle:
       "5+ years building data-intensive systems in event-driven architectures and cloud-native environments. Specializing in scalable data solutions and GenAI applications.",
     cta_projects: "View Projects",
