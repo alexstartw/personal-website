@@ -3,23 +3,38 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-// Cell dimensions (px)
 const CELL_W = 64;
 const CELL_H = 32;
-const COLS = 38;
-const ROWS = 22;
+const COLS = 50;
+const ROWS = 30;
 
-// Subtle accent-family colors — semi-transparent so they work on light + dark
-const HIGHLIGHT_COLORS = [
-  "rgba(99, 102, 241, 0.45)",  // indigo
-  "rgba(59, 130, 246, 0.45)",  // blue
-  "rgba(6, 182, 212, 0.40)",   // cyan
-  "rgba(139, 92, 246, 0.40)",  // violet
-  "rgba(236, 72, 153, 0.35)",  // pink
-  "rgba(16, 185, 129, 0.35)",  // emerald
+const COLORS = [
+  "rgba(99, 102, 241, 0.55)",
+  "rgba(59, 130, 246, 0.50)",
+  "rgba(6, 182, 212, 0.45)",
+  "rgba(139, 92, 246, 0.50)",
+  "rgba(236, 72, 153, 0.45)",
+  "rgba(16, 185, 129, 0.40)",
+  "rgba(245, 158, 11, 0.40)",
 ];
 
-interface Cell {
+function randomColor() {
+  return COLORS[Math.floor(Math.random() * COLORS.length)];
+}
+
+// Direct DOM mutation — no React state, no re-renders
+function onEnter(e: React.MouseEvent<HTMLDivElement>) {
+  const el = e.currentTarget;
+  el.style.transition = "background-color 0s";
+  el.style.backgroundColor = randomColor();
+}
+function onLeave(e: React.MouseEvent<HTMLDivElement>) {
+  const el = e.currentTarget;
+  el.style.transition = "background-color 1.8s ease";
+  el.style.backgroundColor = "";
+}
+
+interface Spark {
   col: number;
   row: number;
   color: string;
@@ -29,28 +44,25 @@ interface Cell {
 }
 
 export function BackgroundBoxes() {
-  const [cells, setCells] = useState<Cell[]>([]);
+  const [sparks, setSparks] = useState<Spark[]>([]);
 
-  // Generate after mount to avoid hydration mismatch
+  // Client-only to avoid hydration mismatch
   useEffect(() => {
-    setCells(
-      Array.from({ length: 32 }, () => ({
+    setSparks(
+      Array.from({ length: 22 }, () => ({
         col: Math.floor(Math.random() * COLS),
         row: Math.floor(Math.random() * ROWS),
-        color:
-          HIGHLIGHT_COLORS[
-            Math.floor(Math.random() * HIGHLIGHT_COLORS.length)
-          ],
+        color: randomColor(),
         delay: Math.random() * 10,
         duration: 1.8 + Math.random() * 2.4,
-        repeatDelay: 3 + Math.random() * 6,
+        repeatDelay: 3 + Math.random() * 7,
       })),
     );
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Isometric grid */}
+    <div className="absolute inset-0 overflow-hidden z-0" style={{ pointerEvents: "none" }}>
+      {/* Isometric skewed container */}
       <div
         className="absolute"
         style={{
@@ -59,84 +71,112 @@ export function BackgroundBoxes() {
           width: COLS * CELL_W,
           height: ROWS * CELL_H,
           transform:
-            "translate(-50%, -50%) skewX(-48deg) skewY(14deg) scale(0.675)",
+            "translate(-50%,-50%) skewX(-48deg) skewY(14deg) scale(0.675)",
+          // Enable pointer events only on this layer
+          pointerEvents: "auto",
         }}
       >
-        {/* CSS grid lines — zero JS cost */}
+        {/* Flat CSS grid for lines — zero extra DOM nodes */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: `
               linear-gradient(to right, var(--border) 1px, transparent 1px),
               linear-gradient(to bottom, var(--border) 1px, transparent 1px)
             `,
             backgroundSize: `${CELL_W}px ${CELL_H}px`,
-            opacity: 0.7,
+            opacity: 0.8,
           }}
         />
 
-        {/* "+" markers at every other intersection */}
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ color: "var(--border)", opacity: 0.5 }}
+        {/* Interactive cells — transparent, handle hover */}
+        <div
+          className="absolute inset-0"
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${COLS}, ${CELL_W}px)`,
+          }}
         >
-          {Array.from({ length: Math.ceil(ROWS / 2) }, (_, ri) =>
-            Array.from({ length: Math.ceil(COLS / 2) }, (_, ci) => (
-              <text
-                key={`${ri}-${ci}`}
-                x={ci * 2 * CELL_W - 5}
-                y={ri * 2 * CELL_H + 5}
-                fontSize="14"
-                fill="currentColor"
-                fontFamily="monospace"
-                strokeWidth="0"
+          {Array.from({ length: ROWS * COLS }, (_, idx) => {
+            const col = idx % COLS;
+            const row = Math.floor(idx / COLS);
+            const showPlus = col % 2 === 0 && row % 2 === 0;
+            return (
+              <div
+                key={idx}
+                style={{ width: CELL_W, height: CELL_H, position: "relative" }}
+                onMouseEnter={onEnter}
+                onMouseLeave={onLeave}
               >
-                +
-              </text>
-            )),
-          )}
-        </svg>
+                {showPlus && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="pointer-events-none"
+                    style={{
+                      position: "absolute",
+                      top: -7,
+                      left: -11,
+                      width: 22,
+                      height: 14,
+                      color: "var(--border)",
+                      opacity: 0.55,
+                    }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v12m6-6H6"
+                    />
+                  </svg>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-        {/* Animated highlight cells */}
-        {cells.map((cell, i) => (
+        {/* Auto-sparkle cells (framer-motion, 22 only) */}
+        {sparks.map((s, i) => (
           <motion.div
             key={i}
-            className="absolute"
+            className="absolute pointer-events-none"
             style={{
-              left: cell.col * CELL_W,
-              top: cell.row * CELL_H,
+              left: s.col * CELL_W,
+              top: s.row * CELL_H,
               width: CELL_W,
               height: CELL_H,
-              backgroundColor: cell.color,
+              backgroundColor: s.color,
             }}
             animate={{ opacity: [0, 1, 0] }}
             transition={{
-              duration: cell.duration,
-              delay: cell.delay,
+              duration: s.duration,
+              delay: s.delay,
               repeat: Infinity,
-              repeatDelay: cell.repeatDelay,
+              repeatDelay: s.repeatDelay,
               ease: "easeInOut",
             }}
           />
         ))}
       </div>
 
-      {/* Radial mask — fades grid away from center so text stays readable */}
+      {/* Radial mask — fade grid from center so content stays readable */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 65% 70% at 50% 50%, var(--background) 30%, transparent 100%)",
+            "radial-gradient(ellipse 62% 68% at 50% 50%, var(--background) 28%, transparent 100%)",
         }}
       />
 
-      {/* Edge vignette */}
+      {/* Top/bottom edge vignette */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(to bottom, var(--background) 0%, transparent 18%, transparent 80%, var(--background) 100%)",
+            "linear-gradient(to bottom, var(--background) 0%, transparent 14%, transparent 83%, var(--background) 100%)",
         }}
       />
     </div>
