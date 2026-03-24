@@ -136,7 +136,7 @@ export function FocusRail({
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${activeItem.imageSrc}`}
+              src={activeItem.imageSrc}
               alt=""
               className="h-full w-full object-cover blur-3xl saturate-150 scale-110"
               style={{ opacity: 0.18 }}
@@ -209,7 +209,7 @@ export function FocusRail({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${item.imageSrc}`}
+                  src={item.imageSrc}
                   alt={item.title}
                   className="h-full w-full object-cover pointer-events-none"
                 />
