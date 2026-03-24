@@ -14,6 +14,19 @@ export const zh: Locale = {
     badge: "積極尋求工作機會",
     name: "林力宇 Alex Lin",
     title: "資深數據工程師",
+    headlines: [
+      "將數據轉化\n為商業\n價值",
+      "構建每日處理\nTB 級數據\n的管線系統",
+      "打造真正落地\n的 GenAI\n解決方案",
+      "事件驅動架構\n的設計\n與實踐",
+    ],
+    rotating_keywords: [
+      "事件驅動管線",
+      "TB 級數據系統",
+      "GenAI & RAG 應用",
+      "雲端原生平台",
+      "即時數據分析",
+    ],
     subtitle:
       "5 年以上經驗，專注於事件驅動架構與雲端原生環境中的數據密集型系統開發，擅長可擴展的數據解決方案與 GenAI 應用。",
     cta_projects: "查看專案",
@@ -35,7 +48,7 @@ export const zh: Locale = {
         items: ["半導體製造", "網路資安", "SaaS 軟體", "數據 / AI"],
       },
       { value: "NT$5000萬+", label: "創造專案收益" },
-      { value: "3+", label: "主導 GenAI 應用落地與資料平台規劃" },
+      { value: "10+", label: "主導 GenAI 應用落地與資料平台規劃" },
     ],
   },
   skills: {
