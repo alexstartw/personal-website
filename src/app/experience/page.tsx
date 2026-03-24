@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { img } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import {
   ChevronRight,
@@ -374,7 +375,7 @@ function DetailPanel({ event, lang }: { event: TimelineEvent; lang: string }) {
           {event.logo && (
             <div className="w-12 h-12 rounded-xl overflow-hidden bg-white border border-[var(--border)] flex items-center justify-center shrink-0 shadow-sm">
               <Image
-                src={event.logo}
+                src={img(event.logo)}
                 alt={company}
                 width={40}
                 height={40}

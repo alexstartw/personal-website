@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
+import { img } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -38,7 +39,7 @@ export default async function BlogPostPage({ params }: Props) {
       {post.cover && (
         <div className="w-full h-48 md:h-64 overflow-hidden">
           <Image
-            src={post.cover}
+            src={img(post.cover!)}
             alt={post.title}
             width={1200}
             height={400}

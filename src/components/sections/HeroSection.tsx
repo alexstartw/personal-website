@@ -8,6 +8,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { MouseTooltip } from "@/components/ui/mouse-tooltip";
 import { BackgroundBoxes } from "@/components/ui/background-boxes";
 import { Clock, Globe, TrendingUp, Sparkles, Info } from "lucide-react";
+import { img } from "@/lib/utils";
 
 const TECH_STACK = [
   "Apache Kafka",
@@ -232,7 +233,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
           <div className="flex items-center gap-3">
             <div className="relative w-8 h-8 rounded-full overflow-hidden border border-[var(--border)] shrink-0">
               <Image
-                src="/avatar.jpg"
+                src={img("/avatar.jpg")}
                 alt="Alex Lin"
                 fill
                 className="object-cover object-top"

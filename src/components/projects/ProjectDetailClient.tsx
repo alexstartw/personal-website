@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Image from "next/image";
+import { img } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight,
@@ -404,7 +405,7 @@ function DetailPanel({ project, lang }: { project: Project; lang: string }) {
                   className="rounded-lg overflow-hidden border border-[var(--border)] bg-[var(--card)]"
                 >
                   <Image
-                    src={src}
+                    src={img(src)}
                     alt={`${title} diagram ${i + 1}`}
                     width={560}
                     height={315}

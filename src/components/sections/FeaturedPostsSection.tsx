@@ -6,6 +6,7 @@ import { FadeIn } from "@/components/ui/FadeIn";
 import { FocusRail, type FocusRailItem } from "@/components/ui/focus-rail";
 import { BackgroundBoxes } from "@/components/ui/background-boxes";
 import type { PostMeta } from "@/lib/posts";
+import { img } from "@/lib/utils";
 
 export function FeaturedPostsSection({ posts }: { posts: PostMeta[] }) {
   const { t } = useLanguage();
@@ -16,7 +17,7 @@ export function FeaturedPostsSection({ posts }: { posts: PostMeta[] }) {
     id: post.slug,
     title: post.title,
     description: post.description,
-    imageSrc: post.cover ?? "",
+    imageSrc: img(post.cover ?? ""),
     href: `/blog?slug=${encodeURIComponent(post.slug)}`,
     meta: post.categories[0],
   }));
