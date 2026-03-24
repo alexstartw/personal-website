@@ -39,39 +39,67 @@ export function GradientCard({
       </span>
 
       {/* Content glass panel */}
-      <div className="relative z-20 w-full h-full flex flex-col justify-between p-3.5 bg-[var(--card)]/85 backdrop-blur-md rounded-xl border border-[var(--border)]/60 transition-all duration-500 group-hover:-translate-x-3">
+      <div className="relative z-20 w-full h-full flex flex-col p-3.5 bg-[var(--card)]/85 backdrop-blur-md rounded-xl border border-[var(--border)]/60 transition-all duration-500 group-hover:-translate-x-3 overflow-hidden">
         {items ? (
+          /* ── List card (Industries) ── */
           <>
+            {/* Top accent bar */}
+            <div
+              className="absolute top-0 left-0 right-0 h-[2px]"
+              style={{ background: gradient }}
+            />
+            {/* Label */}
             <p
-              className="text-[9px] font-mono tracking-[0.14em] uppercase leading-none"
+              className="text-[8px] font-mono tracking-[0.18em] uppercase mt-2 mb-2.5 leading-none"
               style={{ color: gradientFrom }}
             >
               {label}
             </p>
-            <div className="flex flex-wrap gap-1">
-              {items.map((item) => (
-                <span
-                  key={item}
-                  className="text-[9px] px-1.5 py-0.5 rounded border border-white/20 text-[var(--foreground)] font-mono leading-tight"
-                >
-                  {item}
-                </span>
+            {/* Vertical list */}
+            <div className="flex flex-col gap-[5px]">
+              {items.map((item, i) => (
+                <div key={item} className="flex items-center gap-1.5">
+                  <span
+                    className="w-[3px] h-[3px] rounded-full shrink-0"
+                    style={{
+                      background: `linear-gradient(135deg, ${gradientFrom}, ${gradientTo})`,
+                      opacity: 0.6 + i * 0.1,
+                    }}
+                  />
+                  <span className="text-[10px] font-medium text-[var(--foreground)] leading-none tracking-tight">
+                    {item}
+                  </span>
+                </div>
               ))}
             </div>
           </>
         ) : (
+          /* ── Numeric stat card ── */
           <>
+            {/* Top accent bar */}
+            <div
+              className="absolute top-0 left-0 right-0 h-[2px]"
+              style={{ background: gradient }}
+            />
+            {/* Faint decorative circle — depth */}
+            <div
+              className="absolute -top-5 -right-5 w-20 h-20 rounded-full"
+              style={{ background: gradientTo, opacity: 0.07 }}
+            />
+            {/* Label */}
             <p
-              className="text-[9px] font-mono tracking-[0.14em] uppercase leading-none"
+              className="text-[8px] font-mono tracking-[0.18em] uppercase mt-2 leading-none"
               style={{ color: gradientFrom }}
             >
               {label}
             </p>
+            {/* Number — the hero */}
             <p
-              className="text-3xl font-bold leading-none tracking-tight"
+              className="leading-none tracking-tight font-bold mt-auto"
               style={{
                 fontFamily: "var(--font-display, Georgia, serif)",
                 color: gradientTo,
+                fontSize: value && value.length > 5 ? "1.5rem" : "2.4rem",
               }}
             >
               {value}
