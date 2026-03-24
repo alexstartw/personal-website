@@ -220,8 +220,8 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
       {/* ── Background grid ────────────────────────────── */}
       <BackgroundBoxes />
 
-      {/* ── Main content ──────────────────────────────── */}
-      <div className="relative z-10 flex-1 flex flex-col max-w-5xl mx-auto px-6 w-full pt-[3.5rem] min-h-0">
+      {/* ── Main content — pointer-events-none on wrappers, restored on interactives ── */}
+      <div className="relative z-10 flex-1 flex flex-col max-w-5xl mx-auto px-6 w-full pt-[3.5rem] min-h-0 pointer-events-none">
         {/* Meta bar */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
@@ -271,7 +271,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
               <RotatingKeyword keywords={h.rotating_keywords} />
             </motion.div>
 
-            {/* CTA links */}
+            {/* CTA links — restore pointer events for buttons */}
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -280,7 +280,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
             >
               <button
                 onClick={() => onScrollTo("projects")}
-                className="group flex items-center gap-1.5 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)] transition-colors duration-200"
+                className="pointer-events-auto group flex items-center gap-1.5 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)] transition-colors duration-200"
               >
                 {h.cta_projects}
                 <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
@@ -289,7 +289,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
               </button>
               <button
                 onClick={() => onScrollTo("contact")}
-                className="group flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors duration-200"
+                className="pointer-events-auto group flex items-center gap-1.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors duration-200"
               >
                 {h.cta_contact}
                 <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
@@ -301,6 +301,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
 
           {/* ── RIGHT: 2×2 stat cards + info tooltip ── */}
           <div className="shrink-0 flex flex-col items-end gap-2">
+            {/* Stat cards restore pointer events for hover effects */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -309,7 +310,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
                 ease: [0.16, 1, 0.3, 1],
                 delay: 0.38,
               }}
-              className="border border-[var(--border)] rounded-xl overflow-hidden grid grid-cols-2 w-[320px]"
+              className="pointer-events-auto border border-[var(--border)] rounded-xl overflow-hidden grid grid-cols-2 w-[320px]"
             >
               {a.stats.map((stat, i) => (
                 <StatCard
@@ -330,6 +331,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.7 }}
+              className="pointer-events-auto"
             >
               <MouseTooltip
                 content={bioContent}
@@ -346,7 +348,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 1.0 }}
-        className="relative z-10 shrink-0 border-t border-[var(--border)] overflow-hidden"
+        className="relative z-10 shrink-0 border-t border-[var(--border)] overflow-hidden pointer-events-none"
         aria-hidden="true"
       >
         <div className="flex py-3 hero-marquee">
