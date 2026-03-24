@@ -556,17 +556,10 @@ async function init() {
     setStatus("⚠ Cannot connect to server. Run: node tools/server.js", true);
   }
 
-  // Configure marked
-  marked.setOptions({
-    highlight: (code, lang) => {
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(code, { language: lang }).value;
-      }
-      return hljs.highlightAuto(code).value;
-    },
-    breaks: true,
-    gfm: true,
-  });
+  // Configure marked (v12: highlight option removed; use post-parse hljs.highlightElement instead)
+  marked.setOptions({ breaks: true, gfm: true });
+
+  initScrollSync();
 }
 
 // ── Date ───────────────────────────────────────────────────────────────────
@@ -642,7 +635,32 @@ function removeTag(type, i) {
 function renderPreview() {
   const md = document.getElementById("editor").value;
   document.getElementById("preview").innerHTML = marked.parse(md);
-  document.querySelectorAll("#preview pre code").forEach(el => hljs.highlightElement(el));
+  if (typeof hljs !== "undefined") {
+    document.querySelectorAll("#preview pre code").forEach(el => hljs.highlightElement(el));
+  }
+}
+
+// ── Scroll sync ────────────────────────────────────────────────────────────
+let syncingScroll = false;
+function initScrollSync() {
+  const editor = document.getElementById("editor");
+  const preview = document.querySelector(".preview-scroll");
+
+  editor.addEventListener("scroll", () => {
+    if (syncingScroll) return;
+    syncingScroll = true;
+    const pct = editor.scrollTop / (editor.scrollHeight - editor.clientHeight || 1);
+    preview.scrollTop = pct * (preview.scrollHeight - preview.clientHeight);
+    requestAnimationFrame(() => { syncingScroll = false; });
+  });
+
+  preview.addEventListener("scroll", () => {
+    if (syncingScroll) return;
+    syncingScroll = true;
+    const pct = preview.scrollTop / (preview.scrollHeight - preview.clientHeight || 1);
+    editor.scrollTop = pct * (editor.scrollHeight - editor.clientHeight);
+    requestAnimationFrame(() => { syncingScroll = false; });
+  });
 }
 
 // ── Toolbar helpers ────────────────────────────────────────────────────────
