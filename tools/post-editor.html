@@ -376,7 +376,8 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
   <button class="btn" onclick="newPost()">＋ New</button>
   <button class="btn" onclick="toggleTheme()">🌙 Theme</button>
   <button class="btn" onclick="openImageModal()">🖼 Insert Image</button>
-  <button class="btn btn-primary" onclick="savePost()">💾 Save</button>
+  <button class="btn" onclick="savePost()">💾 Save</button>
+  <button class="btn btn-primary" onclick="publishPost()">🚀 Publish</button>
 </div>
 
 <!-- Open Post Panel -->
@@ -872,9 +873,9 @@ async function savePost() {
   const cover = document.getElementById("fm-cover").value.trim();
   const content = document.getElementById("editor").value;
 
-  if (!title) return toast("✗ Title is required", "err");
-  if (!filename) return toast("✗ Filename is required", "err");
-  if (!content.trim()) return toast("✗ Content is empty", "err");
+  if (!title) { toast("✗ Title is required", "err"); return false; }
+  if (!filename) { toast("✗ Filename is required", "err"); return false; }
+  if (!content.trim()) { toast("✗ Content is empty", "err"); return false; }
 
   // Build frontmatter
   let fm = `---\ntitle: ${title}\ndate: "${date}"\ndescription: ${desc || title}`;
@@ -901,9 +902,11 @@ async function savePost() {
         existingSlugs.push(safe.replace(".md", ""));
       }
       checkSlug();
+      return true;
     } else {
       setStatus(`✗ ${data.error}`, true);
       toast("✗ Save failed", "err");
+      return false;
     }
   } catch(e) {
     setStatus(`✗ ${e.message}`, true);
@@ -1067,6 +1070,37 @@ function newPost() {
   editingSlug = null;
   setStatus("Ready");
   document.getElementById("fm-title").focus();
+}
+
+// ── Publish (save + git commit + push) ─────────────────────────────────────
+async function publishPost() {
+  // Save first
+  const saved = await savePost();
+  if (saved === false) return; // savePost validation failed
+
+  const slug = document.getElementById("fm-filename").value.replace(/\.md$/, "");
+  const title = document.getElementById("fm-title").value.trim();
+  if (!slug || !title) return toast("✗ Save the post first", "err");
+
+  setStatus("Publishing...");
+  try {
+    const res = await fetch("/api/publish", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, title }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setStatus(`✓ ${data.message}`);
+      toast(`✓ ${data.message}`, "ok");
+    } else {
+      setStatus(`✗ ${data.error}`, true);
+      toast("✗ Publish failed", "err");
+    }
+  } catch(e) {
+    setStatus(`✗ ${e.message}`, true);
+    toast("✗ Cannot reach server", "err");
+  }
 }
 
 // ── Theme ──────────────────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ const fs = require("fs");
 const path = require("path");
 const https = require("https");
 const url = require("url");
+const { exec } = require("child_process");
 
 const PORT = 3001;
 const ROOT = path.join(__dirname, "..");
@@ -194,6 +195,37 @@ async function handleUploadImage(req, res) {
   json(res, { ok: true, path: `/images/posts/content/${filename}` });
 }
 
+async function handlePublish(req, res) {
+  const buf = await readBody(req);
+  const { slug, title } = JSON.parse(buf.toString());
+  if (!slug || !title)
+    return json(res, { error: "Missing slug or title" }, 400);
+
+  const postFile = path.join("content", "posts", `${slug}.md`);
+  const imagesDir = path.join("public", "images", "posts");
+
+  function run(cmd) {
+    return new Promise((resolve, reject) => {
+      exec(cmd, { cwd: ROOT }, (err, stdout, stderr) => {
+        if (err) reject(new Error(stderr || err.message));
+        else resolve(stdout.trim());
+      });
+    });
+  }
+
+  try {
+    await run(`git add "${postFile}" "${imagesDir}"`);
+    // Check if there's anything staged
+    const staged = await run("git diff --cached --name-only");
+    if (!staged) return json(res, { ok: true, message: "Nothing to commit" });
+    await run(`git commit -m "post: ${title.replace(/"/g, "'")}"`);
+    await run("git push");
+    json(res, { ok: true, message: "Published!" });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
 // ── Server ────────────────────────────────────────────────────────────────────
 
 const server = http.createServer(async (req, res) => {
@@ -222,6 +254,8 @@ const server = http.createServer(async (req, res) => {
       return await handleDownloadImage(req, res);
     if (pathname === "/api/upload-image" && req.method === "POST")
       return await handleUploadImage(req, res);
+    if (pathname === "/api/publish" && req.method === "POST")
+      return await handlePublish(req, res);
 
     // Serve static files from /public/
     if (pathname.startsWith("/public/")) {
