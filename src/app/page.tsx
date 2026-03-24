@@ -3,6 +3,7 @@ import { HomeClient } from "@/components/HomeClient";
 
 export default function Home() {
   const allPosts = getAllPostMetas();
-  const featuredPosts = allPosts.filter((p) => p.cover).slice(0, 5);
+  // Most recent 5 posts (getAllPostMetas already sorts newest-first)
+  const featuredPosts = allPosts.slice(0, 5);
   return <HomeClient featuredPosts={featuredPosts} />;
 }
