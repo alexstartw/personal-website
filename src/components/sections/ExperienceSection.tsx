@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { BackgroundBoxes } from "@/components/ui/background-boxes";
 import RadialOrbitalTimeline, {
   type OrbitalTimelineItem,
 } from "@/components/ui/radial-orbital-timeline";
@@ -88,8 +89,10 @@ export function ExperienceSection() {
   return (
     <section
       id="experience"
-      className="relative h-screen snap-start snap-always flex flex-col bg-background"
+      className="relative h-screen snap-start snap-always flex flex-col"
     >
+      <BackgroundBoxes />
+
       {/* Header — floats above the orbital */}
       <div className="absolute top-0 left-0 right-0 px-6 pt-14 pb-3 z-10 pointer-events-none">
         <div className="max-w-5xl mx-auto">
@@ -112,7 +115,7 @@ export function ExperienceSection() {
       </div>
 
       {/* Orbital timeline fills the section */}
-      <div className="flex-1">
+      <div className="relative z-10 flex-1">
         <RadialOrbitalTimeline
           timelineData={orbitalData}
           onNavigate={handleNavigate}

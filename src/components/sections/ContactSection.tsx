@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { BackgroundBoxes } from "@/components/ui/background-boxes";
 
 const LINKS = [
   {
@@ -56,18 +57,9 @@ export function ContactSection() {
       id="contact"
       className="relative h-screen snap-start snap-always flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* Background gradient */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 60% 50% at 50% 60%, rgba(59,130,246,0.06) 0%, transparent 80%)",
-          }}
-        />
-      </div>
+      <BackgroundBoxes />
 
-      <div className="relative max-w-2xl mx-auto px-6 text-center w-full">
+      <div className="relative z-10 max-w-2xl mx-auto px-6 text-center w-full pointer-events-none">
         {/* Label */}
         <FadeIn>
           <p className="text-xs font-medium tracking-widest uppercase text-[var(--accent)] mb-6">
@@ -99,7 +91,7 @@ export function ContactSection() {
 
         {/* Contact links */}
         <FadeIn delay={0.3}>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="pointer-events-auto flex flex-col sm:flex-row items-center justify-center gap-4">
             {LINKS.map((link, i) => (
               <motion.div
                 key={link.key}
@@ -124,7 +116,7 @@ export function ContactSection() {
 
       {/* VS Code–style status bar footer */}
       <FadeIn delay={0.55}>
-        <div className="absolute bottom-0 left-0 right-0 h-8 border-t border-[var(--border)] bg-[var(--card)]/70 backdrop-blur-sm flex items-center px-5 gap-3 overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 z-10 h-8 border-t border-[var(--border)] bg-[var(--card)]/70 backdrop-blur-sm flex items-center px-5 gap-3 overflow-hidden pointer-events-auto">
           {/* Left — terminal prompt */}
           <span className="font-mono text-[10px] leading-none flex items-center gap-1 shrink-0">
             <span className="text-[var(--accent)]">alex</span>

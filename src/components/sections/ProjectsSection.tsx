@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { FadeIn, FadeInStagger, FadeInItem } from "@/components/ui/FadeIn";
+import { BackgroundBoxes } from "@/components/ui/background-boxes";
 import { WaveProjectCard } from "@/components/ui/wave-project-card";
 import { projects } from "@/data/projects";
 
@@ -23,7 +24,9 @@ export function ProjectsSection() {
       id="projects"
       className="relative h-screen snap-start snap-always flex items-center overflow-hidden"
     >
-      <div className="max-w-5xl mx-auto px-6 w-full">
+      <BackgroundBoxes />
+
+      <div className="relative z-10 max-w-5xl mx-auto px-6 w-full pointer-events-none">
         {/* Header */}
         <div className="flex items-end justify-between mb-8">
           <div>
@@ -39,7 +42,7 @@ export function ProjectsSection() {
           <FadeIn delay={0.15}>
             <Link
               href="/projects"
-              className="hidden md:flex items-center gap-1 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+              className="pointer-events-auto hidden md:flex items-center gap-1 text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
             >
               {p.view_all}
             </Link>
@@ -47,7 +50,10 @@ export function ProjectsSection() {
         </div>
 
         {/* Cards */}
-        <FadeInStagger className="grid md:grid-cols-3 gap-5" staggerDelay={0.1}>
+        <FadeInStagger
+          className="pointer-events-auto grid md:grid-cols-3 gap-5"
+          staggerDelay={0.1}
+        >
           {featured.map((project, i) => {
             const title =
               lang === "zh" && project.titleZh
