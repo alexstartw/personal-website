@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { StatCard } from "@/components/ui/stat-card";
 import { MouseTooltip } from "@/components/ui/mouse-tooltip";
+import { BackgroundBoxes } from "@/components/ui/background-boxes";
 import { Clock, Globe, TrendingUp, Sparkles, Info } from "lucide-react";
 
 const TECH_STACK = [
@@ -216,8 +217,11 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
       id="hero"
       className="relative h-screen snap-start snap-always flex flex-col overflow-hidden"
     >
+      {/* ── Background grid ────────────────────────────── */}
+      <BackgroundBoxes />
+
       {/* ── Main content ──────────────────────────────── */}
-      <div className="flex-1 flex flex-col max-w-5xl mx-auto px-6 w-full pt-[3.5rem] min-h-0">
+      <div className="relative z-10 flex-1 flex flex-col max-w-5xl mx-auto px-6 w-full pt-[3.5rem] min-h-0">
         {/* Meta bar */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
@@ -342,7 +346,7 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 1.0 }}
-        className="shrink-0 border-t border-[var(--border)] overflow-hidden"
+        className="relative z-10 shrink-0 border-t border-[var(--border)] overflow-hidden"
         aria-hidden="true"
       >
         <div className="flex py-3 hero-marquee">
