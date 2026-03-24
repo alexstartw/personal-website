@@ -12,7 +12,7 @@ export interface Locale {
     badge: string;
     name: string;
     title: string;
-    headline: string;
+    headlines: string[];
     rotating_keywords: string[];
     subtitle: string;
     cta_projects: string;
@@ -83,7 +83,12 @@ export const en: Locale = {
     badge: "Available for opportunities",
     name: "Li-Yu Alex Lin",
     title: "Data Engineer",
-    headline: "Turning data\ninto business\nvalue",
+    headlines: [
+      "Turning data\ninto business\nvalue",
+      "Building pipelines\nthat handle\nTB-scale load",
+      "Delivering GenAI\nsolutions\nthat matter",
+      "Event-driven\narchitecture\nat scale",
+    ],
     rotating_keywords: [
       "event-driven pipelines",
       "TB-scale data systems",
