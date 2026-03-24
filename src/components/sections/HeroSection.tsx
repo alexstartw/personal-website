@@ -4,34 +4,30 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { GradientCard } from "@/components/ui/gradient-card";
+import { StatCard } from "@/components/ui/stat-card";
+import { Clock, Globe, TrendingUp, Sparkles } from "lucide-react";
 
 const TECH_STACK = [
   "Apache Kafka",
   "dbt",
-  "Apache Spark",
   "Airflow",
   "PostgreSQL",
   "Python",
-  "Go",
+  "C#",
   "GenAI",
   "RAG",
-  "Apache Flink",
   "ClickHouse",
-  "Kubernetes",
-  "dlt",
   "LLM",
-  "Terraform",
   "FastAPI",
   "Redis",
+  "Docker",
+  "AWS",
+  "Snowflake",
+  "Grafana",
 ];
 
-const CARD_GRADIENTS = [
-  { from: "#3b82f6", to: "#6366f1" }, // blue → indigo
-  { from: "#10b981", to: "#06b6d4" }, // emerald → cyan
-  { from: "#f59e0b", to: "#ef4444" }, // amber → red
-  { from: "#8b5cf6", to: "#ec4899" }, // violet → pink
-];
+const STAT_ICONS = [Clock, Globe, TrendingUp, Sparkles];
+const STAT_ACCENTS = ["#6366f1", "#06b6d4", "#ef4444", "#ec4899"];
 
 // Rotating keyword component — Marqeta-style fade+slide swap
 function RotatingKeyword({ keywords }: { keywords: string[] }) {
@@ -180,29 +176,26 @@ export function HeroSection({ onScrollTo }: HeroSectionProps) {
             </motion.div>
           </div>
 
-          {/* ── RIGHT: 2×2 gradient skew cards ──────── */}
-          <div className="grid grid-cols-2 gap-3 shrink-0">
+          {/* ── RIGHT: 2×2 stat cards ──────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.38 }}
+            className="shrink-0 border border-[var(--border)] rounded-xl overflow-hidden grid grid-cols-2 w-[320px]"
+          >
             {a.stats.map((stat, i) => (
-              <motion.div
+              <StatCard
                 key={stat.label}
-                initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{
-                  duration: 0.55,
-                  ease: [0.16, 1, 0.3, 1],
-                  delay: 0.38 + i * 0.1,
-                }}
-              >
-                <GradientCard
-                  value={stat.value || undefined}
-                  label={stat.label}
-                  items={stat.items}
-                  gradientFrom={CARD_GRADIENTS[i].from}
-                  gradientTo={CARD_GRADIENTS[i].to}
-                />
-              </motion.div>
+                value={stat.value || undefined}
+                label={stat.label}
+                items={stat.items}
+                icon={STAT_ICONS[i]}
+                accentColor={STAT_ACCENTS[i]}
+                borderRight={i % 2 === 0}
+                borderBottom={i < 2}
+              />
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
 

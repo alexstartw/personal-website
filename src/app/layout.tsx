@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Instrument_Serif } from "next/font/google";
+import { Instrument_Serif, Cormorant_Garamond } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Navbar } from "@/components/layout/Navbar";
@@ -10,6 +10,14 @@ const instrumentSerif = Instrument_Serif({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-display",
+  display: "swap",
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  weight: ["600", "700"],
+  style: ["italic"],
+  subsets: ["latin"],
+  variable: "--font-stat",
   display: "swap",
 });
 
@@ -37,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={instrumentSerif.variable}
+      className={`${instrumentSerif.variable} ${cormorantGaramond.variable}`}
       suppressHydrationWarning
     >
       <body>
