@@ -70,7 +70,10 @@ export const zh: Locale = {
   projects: {
     label: "專案",
     heading: "精選作品",
+    page_heading: "所有專案",
+    page_description: "數據工程、生成式 AI、雲端基礎建設及更多。",
     view_all: "查看所有專案 →",
+    all: "全部",
     category_map: {
       "Data Engineering": "數據工程",
       "AI / ML": "AI / 機器學習",

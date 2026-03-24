@@ -47,7 +47,10 @@ export interface Locale {
   projects: {
     label: string;
     heading: string;
+    page_heading: string;
+    page_description: string;
     view_all: string;
+    all: string;
     category_map: Record<string, string>;
   };
   posts: {
@@ -139,7 +142,10 @@ export const en: Locale = {
   projects: {
     label: "Projects",
     heading: "Featured Work",
+    page_heading: "All Projects",
+    page_description: "Data engineering, GenAI, cloud infrastructure, and more.",
     view_all: "View all projects →",
+    all: "All",
     category_map: {
       "Data Engineering": "Data Engineering",
       "AI / ML": "AI / ML",
