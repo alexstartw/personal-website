@@ -29,6 +29,36 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Post Editor
+
+A local web-based editor for writing and publishing blog posts.
+
+Start the editor server:
+
+```bash
+pnpm editor
+# or
+node tools/server.js
+```
+
+Open [http://localhost:3001](http://localhost:3001) in your browser.
+
+### Features
+
+- Write posts in Markdown with live preview
+- Syntax highlighting in the preview pane
+- Upload a cover image (saved to `public/images/posts/covers/`)
+- Load and edit existing posts
+- **Publish** button — saves the post, commits, and pushes to GitHub in one click
+
+### File locations
+
+| Type | Path |
+|------|------|
+| Post Markdown | `content/posts/<slug>.md` |
+| Cover images | `public/images/posts/covers/` |
+| Content images | `public/images/posts/content/` |
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

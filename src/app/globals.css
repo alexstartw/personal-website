@@ -20,6 +20,17 @@
   --card: #111827;
 }
 
+/* ── Photographer mode theme (always dark) ──────────────────────────────────── */
+.photo-mode {
+  --background: #080806;
+  --foreground: #f0ede8;
+  --accent: #c8a882;
+  --accent-dark: #b8936e;
+  --muted: #6e6860;
+  --border: #1e1c19;
+  --card: #111009;
+}
+
 /* Hero display font */
 .hero-display {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Briefcase,
   FolderOpen,
@@ -11,11 +11,14 @@ import {
   Mail,
   Home,
   BookOpen,
+  Camera,
+  Star,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LangToggle } from "@/components/ui/LangToggle";
 import { AppleDock, AppleDockIcon } from "@/components/ui/apple-dock";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteMode } from "@/context/SiteModeContext";
 import { cn } from "@/lib/utils";
 
 const PAGE_LINKS = [
@@ -68,13 +71,52 @@ const DOCK_ITEMS = [
   },
 ] as const;
 
+const PHOTO_DOCK_ITEMS = [
+  {
+    id: "portrait",
+    href: "/photo/portrait",
+    icon: Camera,
+    label: "Portrait",
+  },
+  {
+    id: "coser",
+    href: "/photo/coser",
+    icon: Star,
+    label: "Coser",
+  },
+] as const;
+
+/** Detects N rapid clicks within a time window and fires a callback. */
+function useMultiClick(count: number, callback: () => void, windowMs = 400) {
+  const clickCountRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  return useCallback(() => {
+    clickCountRef.current += 1;
+    clearTimeout(timerRef.current);
+
+    if (clickCountRef.current >= count) {
+      clickCountRef.current = 0;
+      callback();
+    } else {
+      timerRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+      }, windowMs);
+    }
+  }, [count, callback, windowMs]);
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useLanguage();
+  const { triggerSwitch } = useSiteMode();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
+
   const isHome = pathname === "/";
+  const isPhotoMode = pathname.startsWith("/photo");
+
   const showDock =
     isHome ||
     pathname === "/experience" ||
@@ -88,24 +130,41 @@ export function Navbar() {
     else router.push(`/#${id}`);
   };
 
-  // On non-home pages that show the dock, derive activeSection from pathname
+  const handleModeSwitch = useCallback(() => {
+    const target = isPhotoMode ? "/" : "/photo";
+    triggerSwitch(() => router.push(target));
+  }, [isPhotoMode, triggerSwitch, router]);
+
+  const handleHomeTripleClick = useMultiClick(3, handleModeSwitch);
+
+  const handleHomeSingleClick = useCallback(() => {
+    if (isPhotoMode) {
+      router.push("/photo");
+    } else if (isHome) {
+      scrollToSection("hero");
+    } else {
+      router.push("/");
+    }
+  }, [isPhotoMode, isHome, router]);
+
+  // Wrap: single click + triple-click counter
+  const handleHomeClick = useCallback(() => {
+    handleHomeTripleClick();
+    handleHomeSingleClick();
+  }, [handleHomeTripleClick, handleHomeSingleClick]);
+
+  // Active section tracking (engineer home)
   useEffect(() => {
     if (isHome) return;
-    if (pathname === "/blog" || pathname.startsWith("/blog/")) {
+    if (pathname === "/blog" || pathname.startsWith("/blog/"))
       setActiveSection("blog");
-    } else if (
-      pathname === "/experience" ||
-      pathname.startsWith("/experience/")
-    ) {
+    else if (pathname === "/experience" || pathname.startsWith("/experience/"))
       setActiveSection("experience");
-    } else if (pathname === "/projects" || pathname.startsWith("/projects/")) {
+    else if (pathname === "/projects" || pathname.startsWith("/projects/"))
       setActiveSection("projects");
-    } else {
-      setActiveSection("");
-    }
+    else setActiveSection("");
   }, [pathname, isHome]);
 
-  // On homepage, track active section via IntersectionObserver
   useEffect(() => {
     if (!isHome) return;
     const observers: IntersectionObserver[] = [];
@@ -126,6 +185,70 @@ export function Navbar() {
 
   useEffect(() => setMobileOpen(false), [pathname]);
 
+  // ── Photo-mode navbar ─────────────────────────────────────────────────────
+  if (isPhotoMode) {
+    return (
+      <motion.header
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+        className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)]/80 backdrop-blur-md border-b border-[var(--border)]"
+      >
+        <nav className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+          <Link
+            href="/photo"
+            className="font-semibold text-sm tracking-wide text-[var(--foreground)] hover:text-[var(--accent)] transition-colors shrink-0"
+          >
+            Alex Lin
+          </Link>
+
+          <AppleDock
+            iconSize={32}
+            iconMagnification={48}
+            iconDistance={100}
+            className="h-10 gap-1 rounded-xl px-2 border-0 bg-transparent backdrop-blur-none shadow-none"
+          >
+            {/* Home — triple-click switches back to engineer */}
+            <AppleDockIcon
+              onClick={handleHomeClick}
+              className="hover:bg-[var(--border)] transition-colors rounded-lg"
+              title="Home (triple-click to switch mode)"
+              aria-label="Home"
+            >
+              <Home className="w-4 h-4 text-[var(--muted)]" strokeWidth={1.8} />
+            </AppleDockIcon>
+            <div className="w-px h-5 bg-[var(--border)] mx-0.5 self-center" />
+            {PHOTO_DOCK_ITEMS.map(({ id, href, icon: Icon, label }) => (
+              <AppleDockIcon
+                key={id}
+                onClick={() => router.push(href)}
+                className={cn(
+                  "relative rounded-lg transition-colors hover:bg-[var(--accent)]/10",
+                  pathname === href ? "bg-[var(--border)]" : "",
+                )}
+                title={label}
+                aria-label={label}
+              >
+                <Icon
+                  className="w-4 h-4 text-[var(--accent)]"
+                  strokeWidth={1.8}
+                />
+                {pathname === href && (
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--accent)]" />
+                )}
+              </AppleDockIcon>
+            ))}
+          </AppleDock>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <ThemeToggle />
+          </div>
+        </nav>
+      </motion.header>
+    );
+  }
+
+  // ── Engineer-mode navbar ──────────────────────────────────────────────────
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -151,10 +274,9 @@ export function Navbar() {
           </Link>
         )}
 
-        {/* Center — Dock (home + experience) or page links (other pages) */}
+        {/* Center */}
         <div className="flex-1 flex justify-center">
           {showDock ? (
-            /* Apple Dock in header */
             <AppleDock
               iconSize={32}
               iconMagnification={48}
@@ -162,11 +284,9 @@ export function Navbar() {
               className="h-10 gap-1 rounded-xl px-2 border-0 bg-transparent backdrop-blur-none shadow-none"
             >
               <AppleDockIcon
-                onClick={() =>
-                  isHome ? scrollToSection("hero") : router.push("/")
-                }
+                onClick={handleHomeClick}
                 className="hover:bg-[var(--border)] transition-colors rounded-lg"
-                title="Home"
+                title="Home (triple-click to switch mode)"
                 aria-label="Home"
               >
                 <Home
@@ -195,7 +315,6 @@ export function Navbar() {
               ))}
             </AppleDock>
           ) : (
-            /* Regular links for other pages */
             <ul className="hidden md:flex items-center gap-0.5">
               {PAGE_LINKS.map((link) => (
                 <li key={link.href}>
