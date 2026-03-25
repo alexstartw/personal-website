@@ -1,7 +1,32 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import type { PhotoWork, PhotoCategory } from "@/types/photo";
+import type {
+  PhotoWork,
+  PhotoCategory,
+  PhotoPerson,
+  PhotoLocation,
+} from "@/types/photo";
+
+function parsePerson(raw: unknown): PhotoPerson | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const obj = raw as Record<string, unknown>;
+  if (!obj.name) return undefined;
+  return {
+    name: String(obj.name),
+    ig: obj.ig ? String(obj.ig) : undefined,
+  };
+}
+
+function parseLocation(raw: unknown): PhotoLocation | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const obj = raw as Record<string, unknown>;
+  if (!obj.name) return undefined;
+  return {
+    name: String(obj.name),
+    ig: obj.ig ? String(obj.ig) : undefined,
+  };
+}
 
 const PHOTOS_DIR = path.join(process.cwd(), "content/photos");
 
@@ -32,6 +57,10 @@ export function getAllPhotoWorks(): PhotoWork[] {
         date: parseDate(data.date),
         description: data.description ? String(data.description) : undefined,
         subject: data.subject ? String(data.subject) : undefined,
+        model: parsePerson(data.model),
+        location: parseLocation(data.location),
+        camera: data.camera ? String(data.camera) : undefined,
+        lens: data.lens ? String(data.lens) : undefined,
       } satisfies PhotoWork;
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -53,6 +82,10 @@ export function getPhotoWorkBySlug(slug: string): PhotoWork | null {
     date: parseDate(data.date),
     description: data.description ? String(data.description) : undefined,
     subject: data.subject ? String(data.subject) : undefined,
+    model: parsePerson(data.model),
+    location: parseLocation(data.location),
+    camera: data.camera ? String(data.camera) : undefined,
+    lens: data.lens ? String(data.lens) : undefined,
   };
 }
 
@@ -64,8 +97,6 @@ export function getAllPhotoSlugs(): string[] {
     .map((f) => toSlug(f));
 }
 
-export function getPhotoWorksByCategory(
-  category: PhotoCategory,
-): PhotoWork[] {
+export function getPhotoWorksByCategory(category: PhotoCategory): PhotoWork[] {
   return getAllPhotoWorks().filter((w) => w.category === category);
 }

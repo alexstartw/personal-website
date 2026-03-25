@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, ImageOff } from "lucide-react";
-import { PhotoLightbox } from "./PhotoLightbox";
+import { FilmCarousel } from "./FilmCarousel";
 import type { PhotoWork } from "@/types/photo";
 
 interface GalleryGridProps {
@@ -109,7 +109,7 @@ export function GalleryGrid({ works }: GalleryGridProps) {
 
       <AnimatePresence>
         {lightboxWork && (
-          <PhotoLightbox
+          <FilmCarousel
             work={lightboxWork}
             onClose={() => setLightboxWork(null)}
           />
