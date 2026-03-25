@@ -9,9 +9,11 @@ import {
   useRef,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 
 export type SiteMode = "engineer" | "photographer";
-type TransitionPhase = "idle" | "closing" | "opening";
+// 'waiting' = iris fully black, holding until new page has actually mounted
+type TransitionPhase = "idle" | "closing" | "waiting" | "opening";
 
 interface SiteModeContextValue {
   mode: SiteMode;
@@ -22,14 +24,16 @@ interface SiteModeContextValue {
 const SiteModeContext = createContext<SiteModeContextValue | null>(null);
 
 const STORAGE_KEY = "site-mode";
-const CLOSE_DURATION = 650; // ms — iris closing
-const OPEN_DURATION = 650; // ms — iris opening
+const CLOSE_DURATION = 650; // ms
+const OPEN_DURATION = 650;  // ms
 
 export function SiteModeProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [mode, setMode] = useState<SiteMode>("engineer");
   const [transitionPhase, setTransitionPhase] =
     useState<TransitionPhase>("idle");
   const isTransitioning = useRef(false);
+  const prevPathname = useRef(pathname);
 
   // Read persisted mode on mount
   useEffect(() => {
@@ -39,6 +43,20 @@ export function SiteModeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // When pathname actually changes, the new page has mounted — start opening
+  useEffect(() => {
+    if (transitionPhase === "waiting" && pathname !== prevPathname.current) {
+      prevPathname.current = pathname;
+      setTransitionPhase("opening");
+      setTimeout(() => {
+        setTransitionPhase("idle");
+        isTransitioning.current = false;
+      }, OPEN_DURATION);
+    } else {
+      prevPathname.current = pathname;
+    }
+  }, [pathname, transitionPhase]);
+
   const triggerSwitch = useCallback((onMidpoint: () => void) => {
     if (isTransitioning.current) return;
     isTransitioning.current = true;
@@ -46,19 +64,14 @@ export function SiteModeProvider({ children }: { children: ReactNode }) {
     setTransitionPhase("closing");
 
     setTimeout(() => {
-      // Screen is fully black — navigate + toggle mode
+      // Screen fully black — navigate + toggle mode, then wait for new page
       onMidpoint();
       setMode((prev) => {
         const next = prev === "engineer" ? "photographer" : "engineer";
         localStorage.setItem(STORAGE_KEY, next);
         return next;
       });
-      setTransitionPhase("opening");
-
-      setTimeout(() => {
-        setTransitionPhase("idle");
-        isTransitioning.current = false;
-      }, OPEN_DURATION);
+      setTransitionPhase("waiting");
     }, CLOSE_DURATION);
   }, []);
 

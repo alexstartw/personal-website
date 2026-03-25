@@ -18,7 +18,7 @@ export function ModeTransitionOverlay() {
           initial={{ clipPath: "circle(0% at 50% 50%)" }}
           animate={{
             clipPath:
-              transitionPhase === "closing"
+              transitionPhase === "closing" || transitionPhase === "waiting"
                 ? "circle(150% at 50% 50%)"
                 : "circle(0% at 50% 50%)",
           }}
