@@ -1,10 +1,10 @@
 ---
-title: "Untitled Coser"
+title: "FF46 花博"
 category: coser
-date: "2024-06-15"
+date: "2026-02-08"
 images:
-  - /images/photos/sample-coser-01.jpg
+  - /images/photos/coser-ff46-0208.jpg
 igUrl: ""
 description: ""
-subject: "Character Name / Series"
+subject: ""
 ---
