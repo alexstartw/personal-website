@@ -2,29 +2,27 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useSiteMode } from "@/context/SiteModeContext";
-
-const EASE = [0.76, 0, 0.24, 1] as const;
+import TetrisLoading from "./tetris-loader";
 
 export function ModeTransitionOverlay() {
   const { transitionPhase } = useSiteMode();
   const visible = transitionPhase !== "idle";
+  // Fade out only when 'opening' (new page is ready)
+  const opacity = transitionPhase === "opening" ? 0 : 1;
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
           key="mode-overlay"
-          className="fixed inset-0 z-[9999] bg-black pointer-events-none"
-          initial={{ clipPath: "circle(0% at 50% 50%)" }}
-          animate={{
-            clipPath:
-              transitionPhase === "closing" || transitionPhase === "waiting"
-                ? "circle(150% at 50% 50%)"
-                : "circle(0% at 50% 50%)",
-          }}
-          exit={{ clipPath: "circle(0% at 50% 50%)" }}
-          transition={{ duration: 0.65, ease: EASE }}
-        />
+          className="fixed inset-0 z-[9999] bg-white dark:bg-black flex flex-col items-center justify-center pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+        >
+          <TetrisLoading size="sm" speed="fast" showLoadingText={false} />
+        </motion.div>
       )}
     </AnimatePresence>
   );

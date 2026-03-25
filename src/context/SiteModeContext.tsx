@@ -24,8 +24,8 @@ interface SiteModeContextValue {
 const SiteModeContext = createContext<SiteModeContextValue | null>(null);
 
 const STORAGE_KEY = "site-mode";
-const CLOSE_DURATION = 650; // ms
-const OPEN_DURATION = 650;  // ms
+const CLOSE_DURATION = 300; // ms — fade in overlay before navigating
+const OPEN_DURATION = 400; // ms — fade out after new page mounts
 
 export function SiteModeProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
