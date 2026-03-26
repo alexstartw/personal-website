@@ -14,9 +14,46 @@ export function ThemeToggle() {
 
   const isDark = theme === "dark";
 
+  const handleToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const next = isDark ? "light" : "dark";
+
+    // Use View Transition API for radial reveal if supported
+    if (!document.startViewTransition) {
+      setTheme(next);
+      return;
+    }
+
+    const x = e.clientX;
+    const y = e.clientY;
+    const maxRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y),
+    );
+
+    const transition = document.startViewTransition(() => {
+      setTheme(next);
+    });
+
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${maxRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: 500,
+          easing: "ease-in-out",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    });
+  };
+
   return (
     <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={handleToggle}
       aria-label="Toggle theme"
       className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--border)] transition-colors"
     >

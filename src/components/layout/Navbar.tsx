@@ -14,8 +14,6 @@ import {
   Camera,
   Star,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { LangToggle } from "@/components/ui/LangToggle";
 import { AppleDock, AppleDockIcon } from "@/components/ui/apple-dock";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSiteMode } from "@/context/SiteModeContext";
@@ -195,53 +193,47 @@ export function Navbar() {
         className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)]/80 backdrop-blur-md border-b border-[var(--border)]"
       >
         <nav className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link
-            href="/photo"
-            className="font-semibold text-sm tracking-wide text-[var(--foreground)] hover:text-[var(--accent)] transition-colors shrink-0"
-          >
-            Alex Lin
-          </Link>
-
-          <AppleDock
-            iconSize={32}
-            iconMagnification={48}
-            iconDistance={100}
-            className="h-10 gap-1 rounded-xl px-2 border-0 bg-transparent backdrop-blur-none shadow-none"
-          >
-            {/* Home — triple-click switches back to engineer */}
-            <AppleDockIcon
-              onClick={handleHomeClick}
-              className="hover:bg-[var(--border)] transition-colors rounded-lg"
-              title="Home (triple-click to switch mode)"
-              aria-label="Home"
+          <div className="flex-1 flex justify-center">
+            <AppleDock
+              iconSize={32}
+              iconMagnification={48}
+              iconDistance={100}
+              className="h-10 gap-1 rounded-xl px-2 border-0 bg-transparent backdrop-blur-none shadow-none"
             >
-              <Home className="w-4 h-4 text-[var(--muted)]" strokeWidth={1.8} />
-            </AppleDockIcon>
-            <div className="w-px h-5 bg-[var(--border)] mx-0.5 self-center" />
-            {PHOTO_DOCK_ITEMS.map(({ id, href, icon: Icon, label }) => (
+              {/* Home — triple-click switches back to engineer */}
               <AppleDockIcon
-                key={id}
-                onClick={() => router.push(href)}
-                className={cn(
-                  "relative rounded-lg transition-colors hover:bg-[var(--accent)]/10",
-                  pathname === href ? "bg-[var(--border)]" : "",
-                )}
-                title={label}
-                aria-label={label}
+                onClick={handleHomeClick}
+                className="hover:bg-[var(--border)] transition-colors rounded-lg"
+                title="Home (triple-click to switch mode)"
+                aria-label="Home"
               >
-                <Icon
-                  className="w-4 h-4 text-[var(--accent)]"
+                <Home
+                  className="w-4 h-4 text-[var(--muted)]"
                   strokeWidth={1.8}
                 />
-                {pathname === href && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--accent)]" />
-                )}
               </AppleDockIcon>
-            ))}
-          </AppleDock>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
+              <div className="w-px h-5 bg-[var(--border)] mx-0.5 self-center" />
+              {PHOTO_DOCK_ITEMS.map(({ id, href, icon: Icon, label }) => (
+                <AppleDockIcon
+                  key={id}
+                  onClick={() => router.push(href)}
+                  className={cn(
+                    "relative rounded-lg transition-colors hover:bg-[var(--accent)]/10",
+                    pathname === href ? "bg-[var(--border)]" : "",
+                  )}
+                  title={label}
+                  aria-label={label}
+                >
+                  <Icon
+                    className="w-4 h-4 text-[var(--accent)]"
+                    strokeWidth={1.8}
+                  />
+                  {pathname === href && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--accent)]" />
+                  )}
+                </AppleDockIcon>
+              ))}
+            </AppleDock>
           </div>
         </nav>
       </motion.header>
@@ -257,24 +249,7 @@ export function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)]/80 backdrop-blur-md border-b border-[var(--border)]"
     >
       <nav className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-        {/* Logo */}
-        {isHome ? (
-          <button
-            onClick={() => scrollToSection("hero")}
-            className="font-semibold text-sm tracking-wide text-[var(--foreground)] hover:text-[var(--accent)] transition-colors shrink-0"
-          >
-            Alex Lin
-          </button>
-        ) : (
-          <Link
-            href="/"
-            className="font-semibold text-sm tracking-wide text-[var(--foreground)] hover:text-[var(--accent)] transition-colors shrink-0"
-          >
-            Alex Lin
-          </Link>
-        )}
-
-        {/* Center */}
+        {/* Center — takes remaining space so controls stay right */}
         <div className="flex-1 flex justify-center">
           {showDock ? (
             <AppleDock
@@ -350,8 +325,6 @@ export function Navbar() {
 
         {/* Controls */}
         <div className="flex items-center gap-2 shrink-0">
-          <LangToggle />
-          <ThemeToggle />
           {!isHome && (
             <button
               className="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-full hover:bg-[var(--border)] transition-colors"

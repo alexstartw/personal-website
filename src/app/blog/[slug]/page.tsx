@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
 import { img } from "@/lib/utils";
+import { InstagramEmbedLoader } from "@/components/blog/InstagramEmbedLoader";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -17,7 +18,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(decodeURIComponent(slug));
   if (!post) return {};
-  return { title: post.title, description: post.description };
+  return {
+    title: post.title,
+    description: post.description,
+    keywords: post.tags,
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      type: "article",
+      ...(post.cover ? { images: [{ url: img(post.cover) }] } : {}),
+    },
+  };
 }
 
 function formatDate(iso: string) {
@@ -93,6 +104,7 @@ export default async function BlogPostPage({ params }: Props) {
           className="prose-blog"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
+        {post.content.includes("instagram-media") && <InstagramEmbedLoader />}
       </div>
     </div>
   );

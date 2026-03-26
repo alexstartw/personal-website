@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink, ArrowLeft } from "lucide-react";
 import { getPhotoWorkBySlug, getAllPhotoSlugs } from "@/lib/photos";
+import { img } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -17,7 +18,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const work = getPhotoWorkBySlug(slug);
   if (!work) return {};
-  return { title: work.title };
+  const coverImage = work.images[0] ? img(work.images[0]) : undefined;
+  return {
+    title: work.title,
+    description: `${work.title} — photography by Alex Lin${work.model?.name ? `, featuring ${work.model.name}` : ""}${work.location?.name ? ` at ${work.location.name}` : ""}.`,
+    openGraph: {
+      title: work.title,
+      type: "article",
+      ...(coverImage ? { images: [{ url: coverImage }] } : {}),
+    },
+  };
 }
 
 export default async function PhotoWorkPage({ params }: Props) {
@@ -58,7 +68,10 @@ export default async function PhotoWorkPage({ params }: Props) {
           className={`grid gap-4 ${work.images.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 max-w-xl"}`}
         >
           {work.images.map((src, i) => (
-            <div key={i} className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[var(--card)]">
+            <div
+              key={i}
+              className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[var(--card)]"
+            >
               <Image
                 src={src}
                 alt={`${work.title} ${i + 1}`}

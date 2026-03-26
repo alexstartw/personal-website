@@ -458,14 +458,14 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
       <label>Categories</label>
       <div class="tag-container" id="cat-container" onclick="document.getElementById('cat-input').focus()">
         <input type="text" id="cat-input" class="tag-input-inner" placeholder="輸入後 Enter" list="cat-datalist"
-          onkeydown="handleTagKey(event,'cat')" />
+          onkeydown="handleTagKey(event,'cat')" onchange="handleTagChange(event,'cat')" />
         <datalist id="cat-datalist"></datalist>
       </div>
 
       <label>Tags</label>
       <div class="tag-container" id="tag-container" onclick="document.getElementById('tag-input').focus()">
         <input type="text" id="tag-input" class="tag-input-inner" placeholder="輸入後 Enter" list="tag-datalist"
-          onkeydown="handleTagKey(event,'tag')" />
+          onkeydown="handleTagKey(event,'tag')" onchange="handleTagChange(event,'tag')" />
         <datalist id="tag-datalist"></datalist>
       </div>
     </div>
@@ -772,6 +772,14 @@ function handleTagKey(e, type) {
     if (type === "cat" && categories.length) { categories.pop(); renderTags("cat"); }
     else if (type === "tag" && tags.length) { tags.pop(); renderTags("tag"); }
   }
+}
+
+function handleTagChange(e, type) {
+  const val = e.target.value.trim();
+  if (!val) return;
+  if (type === "cat") { if (!categories.includes(val)) { categories.push(val); renderTags("cat"); } }
+  else { if (!tags.includes(val)) { tags.push(val); renderTags("tag"); } }
+  e.target.value = "";
 }
 
 function renderTags(type) {

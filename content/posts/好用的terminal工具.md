@@ -2,6 +2,8 @@
 title: 好用的terminal工具
 date: "2026-03-24 17:22:07"
 description: 推薦一些好用的 terminal plugins
+categories:
+  - 開發 Tips
 tags:
   - terminal
   - cli

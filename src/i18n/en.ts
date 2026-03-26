@@ -85,7 +85,7 @@ export const en: Locale = {
   hero: {
     badge: "Available for opportunities",
     name: "Li-Yu Alex Lin",
-    title: "Data Engineer",
+    title: "Senior Data Engineer",
     headlines: [
       "Turning data\ninto business\nvalue",
       "Building pipelines\nthat handle\nTB-scale load",
@@ -143,7 +143,8 @@ export const en: Locale = {
     label: "Projects",
     heading: "Featured Work",
     page_heading: "All Projects",
-    page_description: "Data engineering, GenAI, cloud infrastructure, and more.",
+    page_description:
+      "Data engineering, GenAI, cloud infrastructure, and more.",
     view_all: "View all projects →",
     all: "All",
     category_map: {

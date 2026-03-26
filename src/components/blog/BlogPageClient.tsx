@@ -21,6 +21,7 @@ import { CategoriesPanel } from "./panels/CategoriesPanel";
 import { TagAnalysisPanel } from "./panels/TagAnalysisPanel";
 import { SearchOverlay } from "./SearchOverlay";
 import { ArticleOutline } from "./ArticleOutline";
+import { InstagramEmbedLoader } from "./InstagramEmbedLoader";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function toFileName(slug: string) {
@@ -233,6 +234,7 @@ function ArticleContent({
           className="prose-blog"
           dangerouslySetInnerHTML={{ __html: content }}
         />
+        {content.includes("instagram-media") && <InstagramEmbedLoader />}
       </div>
     </motion.div>
   );
@@ -275,9 +277,32 @@ function BlogPageInner({
   );
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchDefaultQuery, setSearchDefaultQuery] = useState("");
+  const [sidebarWidth, setSidebarWidth] = useState(280);
 
   // Stable scroll container — always mounted, ref never breaks
   const articleScrollRef = useRef<HTMLDivElement>(null);
+  const isResizing = useRef(false);
+
+  const onResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isResizing.current) return;
+      setSidebarWidth(Math.min(480, Math.max(120, ev.clientX)));
+    };
+    const onMouseUp = () => {
+      isResizing.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
 
   // Read ?slug= on mount
   useEffect(() => {
@@ -336,7 +361,10 @@ function BlogPageInner({
           onClick={() => activeDockPanel && setActiveDockPanel(null)}
         >
           {/* Left sidebar */}
-          <aside className="w-52 shrink-0 border-r border-[var(--border)] bg-[var(--card)] flex flex-col overflow-hidden">
+          <aside
+            className="shrink-0 border-r border-[var(--border)] bg-[var(--card)] flex flex-col overflow-hidden"
+            style={{ width: sidebarWidth }}
+          >
             <div className="px-3 py-2 border-b border-[var(--border)] flex items-center justify-between">
               <span className="text-[9px] font-mono font-bold tracking-widest uppercase text-[var(--muted)]">
                 Explorer
@@ -361,6 +389,12 @@ function BlogPageInner({
               ))}
             </nav>
           </aside>
+
+          {/* Resize handle */}
+          <div
+            onMouseDown={onResizeMouseDown}
+            className="w-1 shrink-0 cursor-col-resize hover:bg-[var(--accent)]/40 transition-colors active:bg-[var(--accent)]/60"
+          />
 
           {/* Editor column */}
           <div className="flex-1 flex flex-col overflow-hidden min-w-0">

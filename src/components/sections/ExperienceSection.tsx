@@ -94,7 +94,7 @@ export function ExperienceSection() {
       <BackgroundBoxes interactive={false} />
 
       {/* Header — floats above the orbital */}
-      <div className="absolute top-0 left-0 right-0 px-6 pt-14 pb-3 z-20 pointer-events-none">
+      <div className="absolute top-0 left-0 right-0 px-6 pt-20 pb-3 z-20 pointer-events-none">
         <div className="max-w-5xl mx-auto">
           <FadeIn>
             <span className="text-xs font-medium tracking-widest uppercase text-[var(--accent)] mb-3 block">

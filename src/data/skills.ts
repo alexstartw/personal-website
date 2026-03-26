@@ -7,7 +7,6 @@ export const skills: Skill[] = [
   { name: "RESTful API", category: "backend" },
   { name: "Linux / Unix", category: "backend" },
   { name: "Docker", category: "backend" },
-  { name: "Kubernetes", category: "backend" },
   { name: "Git", category: "backend" },
 
   // Data Engineering
@@ -16,6 +15,7 @@ export const skills: Skill[] = [
   { name: "Redis", category: "data" },
   { name: "ClickHouse", category: "data" },
   { name: "Apache Airflow", category: "data" },
+  { name: "Microsoft Fabric", category: "data" },
   { name: "dbt", category: "data" },
   { name: "MLflow", category: "data" },
 

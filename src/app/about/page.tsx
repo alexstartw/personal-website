@@ -5,7 +5,8 @@ import { Timeline } from "@/components/about/Timeline";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about Li-Yu Alex Lin — Senior Data Engineer with 5+ years building data-intensive systems.",
+  description:
+    "Li-Yu (Alex) Lin — Senior Data Engineer with 5+ years building TB-scale data pipelines, GenAI solutions, and cloud-native data platforms across semiconductor, cybersecurity, and SaaS industries.",
 };
 
 export default function AboutPage() {
