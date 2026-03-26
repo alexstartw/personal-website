@@ -7,7 +7,7 @@ import { FontSizeProvider } from "@/context/FontSizeContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { ModeTransitionOverlay } from "@/components/ui/ModeTransitionOverlay";
-import { SettingsBubble } from "@/components/ui/SettingsBubble";
+import { RadialMenu } from "@/components/ui/RadialMenu";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -65,7 +65,7 @@ export default function RootLayout({
                 <Navbar />
                 <main>{children}</main>
                 <ConditionalFooter />
-                <SettingsBubble />
+                <RadialMenu />
               </SiteModeProvider>
             </FontSizeProvider>
           </LanguageProvider>
