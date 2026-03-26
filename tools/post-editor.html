@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Post Editor</title>
+<title>Editor</title>
 
 <!-- marked + highlight.js -->
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
@@ -86,6 +86,8 @@ body {
 .btn:hover { border-color: var(--accent); color: var(--accent); }
 .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+.btn-danger { background: transparent; color: #ef4444; border-color: #ef4444; }
+.btn-danger:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 .btn-sm { padding: 3px 10px; font-size: 11px; }
 
 /* ── Layout ── */
@@ -352,6 +354,41 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
 /* drag-over highlight */
 #editor.drag-over { background: color-mix(in srgb, var(--accent) 6%, var(--background)); }
 
+/* ── Mode tabs ── */
+.mode-tabs { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.mode-tab { padding: 4px 14px; font-size: 12px; border: none; background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.mode-tab.active { background: var(--accent); color: #fff; }
+
+/* ── Photo upload slots ── */
+.photo-area {
+  flex: 1; display: flex; flex-direction: column; overflow-y: auto;
+  background: var(--background); padding: 24px; gap: 16px;
+}
+.photo-slots { display: flex; gap: 16px; flex-wrap: wrap; }
+.photo-slot {
+  flex: 1; min-width: 180px; max-width: 260px;
+  aspect-ratio: 3/4; border: 2px dashed var(--border); border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.15s;
+  background: var(--card);
+}
+.photo-slot:hover { border-color: var(--accent); }
+.photo-slot.has-image { border-style: solid; border-color: var(--border); }
+.photo-slot img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.photo-slot .slot-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s; gap: 8px;
+}
+.photo-slot.has-image:hover .slot-overlay { opacity: 1; }
+.photo-slot .slot-placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; }
+.photo-slot .slot-placeholder .slot-icon { font-size: 24px; }
+.photo-slot .slot-num { position: absolute; top: 8px; left: 10px; font-size: 10px; font-family: ui-monospace,monospace; color: var(--muted); }
+.photo-slot.has-image .slot-num { color: rgba(255,255,255,0.7); }
+.slot-remove { background: rgba(239,68,68,0.8); color: #fff; border: none; border-radius: 5px; padding: 4px 10px; font-size: 11px; cursor: pointer; }
+.slot-replace { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; padding: 4px 10px; font-size: 11px; cursor: pointer; }
+.slot-fname { font-size: 10px; color: var(--muted); font-family: ui-monospace,monospace; margin-top: 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align:center; padding: 0 8px; }
+
 /* Toast */
 .toast {
   position: fixed; bottom: 20px; right: 20px;
@@ -371,19 +408,24 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
 
 <!-- Top bar -->
 <div class="topbar">
-  <div class="topbar-title">✦ <span>Post Editor</span> <span id="editing-label" style="font-weight:400;color:var(--muted);font-size:12px;margin-left:8px;"></span></div>
-  <button class="btn" onclick="toggleOpenPanel()">📂 Open Post</button>
-  <button class="btn" onclick="newPost()">＋ New</button>
+  <div class="topbar-title">✦ <span id="mode-title">Post Editor</span> <span id="editing-label" style="font-weight:400;color:var(--muted);font-size:12px;margin-left:8px;"></span></div>
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tab-post" onclick="setMode('post')">✦ Post</button>
+    <button class="mode-tab" id="tab-photo" onclick="setMode('photo')">📷 Photo</button>
+  </div>
+  <button class="btn" id="btn-open" onclick="toggleOpenPanel()">📂 Open</button>
+  <button class="btn" onclick="newItem()">＋ New</button>
   <button class="btn" onclick="toggleTheme()">🌙 Theme</button>
-  <button class="btn" onclick="openImageModal()">🖼 Insert Image</button>
-  <button class="btn" onclick="savePost()">💾 Save</button>
-  <button class="btn btn-primary" onclick="publishPost()">🚀 Publish</button>
+  <button class="btn" id="btn-insert-img" onclick="openImageModal()">🖼 Insert Image</button>
+  <button class="btn btn-danger" id="btn-delete" onclick="deleteItem()" style="display:none">🗑 Delete</button>
+  <button class="btn" id="btn-save" onclick="saveItem()">💾 Save</button>
+  <button class="btn btn-primary" id="btn-publish" onclick="publishItem()">🚀 Publish</button>
 </div>
 
-<!-- Open Post Panel -->
+<!-- Open Panel (Post & Photo) -->
 <div id="open-panel" style="display:none; position:fixed; top:41px; left:0; right:0; z-index:50;
   background:var(--card); border-bottom:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,0.12); padding:12px 16px;">
-  <input type="text" id="post-search" placeholder="Search posts..." oninput="filterPosts()"
+  <input type="text" id="post-search" placeholder="Search..." oninput="filterItems()"
     style="width:100%; margin-bottom:10px; padding:7px 10px; border:1px solid var(--border); border-radius:6px;
     background:var(--background); color:var(--foreground); font-size:12px; outline:none;" />
   <div id="post-list" style="max-height:260px; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:4px;"></div>
@@ -393,7 +435,9 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
 <div class="layout">
 
   <!-- Sidebar: frontmatter -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="main-sidebar">
+    <!-- ── Blog post fields ── -->
+    <div id="post-fields">
     <div class="sidebar-section">
       <div class="sidebar-section-title">Frontmatter</div>
 
@@ -446,12 +490,80 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
       <div class="sidebar-section-title">File</div>
       <div id="slug-status" style="font-size:11px; color: var(--muted);">—</div>
     </div>
+    </div><!-- end #post-fields -->
+
+    <!-- ── Photo work fields ── -->
+    <div id="photo-fields" style="display:none">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Photo Work</div>
+
+      <label>Title</label>
+      <input type="text" id="ph-title" placeholder="作品標題" oninput="onPhTitleChange()" />
+
+      <label>Filename (slug)</label>
+      <div class="filename-row">
+        <input type="text" id="ph-filename" placeholder="ivan-studio-1018.md" style="font-family:ui-monospace,monospace;font-size:11px" />
+      </div>
+
+      <label>Date</label>
+      <input type="text" id="ph-date" placeholder="2026-01-01" />
+
+      <label>Category</label>
+      <select id="ph-category" onchange="onPhCategoryChange()">
+        <option value="portrait">Portrait — 人像</option>
+        <option value="coser">Coser</option>
+      </select>
+
+      <div id="ph-subject-row">
+        <label>Subject (角色 / 作品名)</label>
+        <input type="text" id="ph-subject" placeholder="角色名稱" />
+      </div>
+
+      <label>Description</label>
+      <input type="text" id="ph-desc" placeholder="簡短描述" />
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Model</div>
+      <label>Name</label>
+      <input type="text" id="ph-model-name" placeholder="Model 姓名" />
+      <label>Instagram URL</label>
+      <input type="text" id="ph-model-ig" placeholder="https://www.instagram.com/xxx" />
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Location</div>
+      <label>Name</label>
+      <input type="text" id="ph-location-name" placeholder="地點名稱" />
+      <label>Instagram URL</label>
+      <input type="text" id="ph-location-ig" placeholder="https://www.instagram.com/xxx" />
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Camera</div>
+      <label>Camera</label>
+      <input type="text" id="ph-camera" placeholder="Sony A7C II" />
+      <label>Lens</label>
+      <input type="text" id="ph-lens" placeholder="85mm f/1.8" />
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Instagram Post</div>
+      <label>Post URL</label>
+      <input type="text" id="ph-ig-url" placeholder="https://www.instagram.com/p/xxxxx/" />
+    </div>
+
+    <div class="sidebar-section" style="flex:1">
+      <div class="sidebar-section-title">File</div>
+      <div id="ph-slug-status" style="font-size:11px; color: var(--muted);">—</div>
+    </div>
+    </div><!-- end #photo-fields -->
 
     <div class="status-bar" id="status-bar">Ready</div>
   </aside>
 
   <!-- Editor + Preview -->
-  <div class="editor-area">
+  <div class="editor-area" id="editor-area">
     <div class="editor-pane">
       <div class="pane-header">
         <strong>Markdown</strong>
@@ -491,7 +603,47 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
       </div>
     </div>
   </div>
+
+  <!-- Photo upload area (visible in photo mode) -->
+  <div class="photo-area" id="photo-area" style="display:none">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">最多 3 張照片 — 點擊或拖曳上傳</div>
+    <div class="photo-slots">
+      <div class="photo-slot" id="slot-0" onclick="triggerSlotUpload(0)"
+           ondragover="slotDragOver(event,0)" ondragleave="slotDragLeave(event,0)" ondrop="slotDrop(event,0)">
+        <span class="slot-num">01</span>
+        <div class="slot-placeholder"><span class="slot-icon">＋</span><span>Photo 1</span></div>
+        <img id="slot-img-0" src="" style="display:none" alt="" />
+        <div class="slot-overlay">
+          <button class="slot-replace" onclick="event.stopPropagation();triggerSlotUpload(0)">Replace</button>
+          <button class="slot-remove" onclick="event.stopPropagation();removeSlotImage(0)">Remove</button>
+        </div>
+      </div>
+      <div class="photo-slot" id="slot-1" onclick="triggerSlotUpload(1)"
+           ondragover="slotDragOver(event,1)" ondragleave="slotDragLeave(event,1)" ondrop="slotDrop(event,1)">
+        <span class="slot-num">02</span>
+        <div class="slot-placeholder"><span class="slot-icon">＋</span><span>Photo 2</span></div>
+        <img id="slot-img-1" src="" style="display:none" alt="" />
+        <div class="slot-overlay">
+          <button class="slot-replace" onclick="event.stopPropagation();triggerSlotUpload(1)">Replace</button>
+          <button class="slot-remove" onclick="event.stopPropagation();removeSlotImage(1)">Remove</button>
+        </div>
+      </div>
+      <div class="photo-slot" id="slot-2" onclick="triggerSlotUpload(2)"
+           ondragover="slotDragOver(event,2)" ondragleave="slotDragLeave(event,2)" ondrop="slotDrop(event,2)">
+        <span class="slot-num">03</span>
+        <div class="slot-placeholder"><span class="slot-icon">＋</span><span>Photo 3</span></div>
+        <img id="slot-img-2" src="" style="display:none" alt="" />
+        <div class="slot-overlay">
+          <button class="slot-replace" onclick="event.stopPropagation();triggerSlotUpload(2)">Replace</button>
+          <button class="slot-remove" onclick="event.stopPropagation();removeSlotImage(2)">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Hidden file input for photo slot uploads -->
+<input type="file" id="slot-file-input" accept="image/*" style="display:none" onchange="handleSlotFileInput(event)" />
 
 <!-- Image modal -->
 <div class="modal-overlay" id="img-modal" onclick="closeModalOutside(event)">
@@ -532,13 +684,19 @@ let existingSlugs = [];
 let allCategories = [];
 let allTags = [];
 let allPosts = [];
+let allPhotos = [];
 let editingSlug = null;   // null = new post, string = editing existing
+let editingPhotoSlug = null;
 let panelLoaded = false;
+let currentMode = "post";
+let photoSlots = [null, null, null];
+let activeSlotIndex = -1;
 
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init() {
-  // Set default date
+  // Set default dates
   document.getElementById("fm-date").value = formatDate(new Date());
+  document.getElementById("ph-date").value = new Date().toISOString().slice(0, 10);
 
   // Load existing posts metadata
   try {
@@ -553,6 +711,9 @@ async function init() {
     allCategories.forEach(c => { const o = document.createElement("option"); o.value = c; catList.appendChild(o); });
     const tagList = document.getElementById("tag-datalist");
     allTags.forEach(t => { const o = document.createElement("option"); o.value = t; tagList.appendChild(o); });
+
+    // Load photos list
+    allPhotos = await fetch("/api/photos").then(r => r.json());
   } catch(e) {
     setStatus("⚠ Cannot connect to server. Run: node tools/server.js", true);
   }
@@ -914,18 +1075,42 @@ async function savePost() {
   }
 }
 
-// ── Open Post panel ────────────────────────────────────────────────────────
+// ── Open panel ─────────────────────────────────────────────────────────────
 function toggleOpenPanel() {
   const panel = document.getElementById("open-panel");
   const isOpen = panel.style.display !== "none";
   panel.style.display = isOpen ? "none" : "block";
   if (!isOpen) {
     document.getElementById("post-search").value = "";
-    renderPostList(allPosts);
+    loadOpenPanelItems();
     document.getElementById("post-search").focus();
-    // Close panel when clicking outside
     setTimeout(() => document.addEventListener("click", closePanelOutside, { once: true }), 0);
   }
+}
+
+function loadOpenPanelItems() {
+  if (currentMode === "post") renderPostList(allPosts);
+  else renderPhotoList(allPhotos);
+}
+
+function renderPhotoList(photos) {
+  const list = document.getElementById("post-list");
+  if (!photos.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 4px;">No photos found</div>';
+    return;
+  }
+  list.innerHTML = photos.map(p => `
+    <div onclick="loadPhoto('${p.slug}')"
+      style="padding:8px 10px; border-radius:6px; cursor:pointer; border:1px solid var(--border);
+             background:var(--background); transition:all 0.12s;"
+      onmouseover="this.style.borderColor='var(--accent)'"
+      onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:12px;font-weight:500;color:var(--foreground);line-height:1.3;margin-bottom:2px;">
+        ${p.title || p.slug}
+      </div>
+      <div style="font-size:10px;color:var(--muted);font-family:ui-monospace,monospace">${p.slug}.md · ${p.category}</div>
+    </div>
+  `).join("");
 }
 
 function closePanelOutside(e) {
@@ -958,12 +1143,17 @@ function renderPostList(posts) {
   `).join("");
 }
 
-function filterPosts() {
+function filterItems() {
   const q = document.getElementById("post-search").value.toLowerCase();
-  const filtered = allPosts.filter(p =>
-    (p.title || "").toLowerCase().includes(q) || p.slug.toLowerCase().includes(q)
-  );
-  renderPostList(filtered);
+  if (currentMode === "post") {
+    renderPostList(allPosts.filter(p =>
+      (p.title || "").toLowerCase().includes(q) || p.slug.toLowerCase().includes(q)
+    ));
+  } else {
+    renderPhotoList(allPhotos.filter(p =>
+      (p.title || "").toLowerCase().includes(q) || p.slug.toLowerCase().includes(q)
+    ));
+  }
 }
 
 async function loadPost(slug) {
@@ -1004,6 +1194,7 @@ async function loadPost(slug) {
     document.getElementById("fm-filename").readOnly = true;
     document.getElementById("fm-filename").style.opacity = "0.6";
     document.getElementById("editing-label").textContent = `✎ ${slug}.md`;
+    document.getElementById("btn-delete").style.display = "";
     checkSlug();
     setStatus(`✓ Loaded: ${slug}.md`);
     toast(`✓ Loaded: ${slug}.md`, "ok");
@@ -1065,6 +1256,7 @@ function newPost() {
   document.getElementById("editing-label").textContent = "";
   document.getElementById("slug-status").textContent = "—";
   document.getElementById("slug-status").style.color = "var(--muted)";
+  document.getElementById("btn-delete").style.display = "none";
   categories = []; tags = [];
   renderTags("cat"); renderTags("tag");
   editingSlug = null;
@@ -1120,6 +1312,365 @@ function toast(msg, type = "ok") {
   el.textContent = msg;
   el.className = `toast ${type} show`;
   setTimeout(() => el.classList.remove("show"), 3000);
+}
+
+// ── Delete ─────────────────────────────────────────────────────────────────
+async function deleteItem() {
+  const isPost = currentMode === "post";
+  const slug = isPost
+    ? document.getElementById("fm-filename").value.replace(/\.md$/, "")
+    : document.getElementById("ph-filename").value.replace(/\.md$/, "");
+  if (!slug) return toast("✗ No file loaded", "err");
+
+  const label = isPost ? `post: ${slug}.md` : `photo: ${slug}.md`;
+  if (!confirm(`Delete ${label}?\nThis cannot be undone.`)) return;
+
+  const endpoint = isPost ? "/api/delete-post" : "/api/delete-photo";
+  setStatus("Deleting...");
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      toast(`✓ Deleted: ${slug}.md`, "ok");
+      setStatus(`✓ Deleted: ${slug}.md`);
+      if (isPost) {
+        allPosts = allPosts.filter(p => p.slug !== slug);
+        existingSlugs = existingSlugs.filter(s => s !== slug);
+        newPost();
+      } else {
+        allPhotos = allPhotos.filter(p => p.slug !== slug);
+        newPhoto();
+      }
+    } else {
+      setStatus(`✗ ${data.error}`, true);
+      toast("✗ Delete failed", "err");
+    }
+  } catch(e) {
+    setStatus(`✗ ${e.message}`, true);
+    toast("✗ Cannot reach server", "err");
+  }
+}
+
+// ── Mode switching ─────────────────────────────────────────────────────────
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById("tab-post").classList.toggle("active", mode === "post");
+  document.getElementById("tab-photo").classList.toggle("active", mode === "photo");
+  document.getElementById("post-fields").style.display = mode === "post" ? "" : "none";
+  document.getElementById("photo-fields").style.display = mode === "photo" ? "" : "none";
+  document.getElementById("editor-area").style.display = mode === "post" ? "" : "none";
+  document.getElementById("photo-area").style.display = mode === "photo" ? "flex" : "none";
+  document.getElementById("btn-insert-img").style.display = mode === "post" ? "" : "none";
+  document.getElementById("mode-title").textContent = mode === "post" ? "Post Editor" : "Photo Editor";
+  if (document.getElementById("open-panel").style.display !== "none") loadOpenPanelItems();
+}
+
+// ── newItem / saveItem / publishItem dispatchers ────────────────────────────
+function newItem() { if (currentMode === "post") newPost(); else newPhoto(); }
+function saveItem() { if (currentMode === "post") savePost(); else savePhoto(); }
+function publishItem() { if (currentMode === "post") publishPost(); else publishPhoto(); }
+
+// ── Photo title → slug ─────────────────────────────────────────────────────
+function onPhTitleChange() {
+  const title = document.getElementById("ph-title").value;
+  const slug = title.trim().replace(/[^\w\u4e00-\u9fff\s-]/g, "").replace(/\s+/g, "-");
+  document.getElementById("ph-filename").value = slug ? `${slug}.md` : "";
+  checkPhSlug();
+}
+
+function checkPhSlug() {
+  const fn = document.getElementById("ph-filename").value.replace(/\.md$/, "");
+  const el = document.getElementById("ph-slug-status");
+  if (!fn) { el.textContent = "—"; el.style.color = "var(--muted)"; return; }
+  if (editingPhotoSlug && editingPhotoSlug === fn) {
+    el.textContent = `✎ Editing "${fn}.md"`;
+    el.style.color = "var(--accent)";
+  } else if (allPhotos.some(p => p.slug === fn)) {
+    el.textContent = `⚠ "${fn}.md" already exists — will overwrite`;
+    el.style.color = "#f59e0b";
+  } else {
+    el.textContent = `✓ "${fn}.md" is available`;
+    el.style.color = "#22c55e";
+  }
+}
+
+function onPhCategoryChange() {
+  const cat = document.getElementById("ph-category").value;
+  document.getElementById("ph-subject-row").style.display = cat === "coser" ? "" : "none";
+}
+
+// ── Photo slots ────────────────────────────────────────────────────────────
+function triggerSlotUpload(index) {
+  activeSlotIndex = index;
+  const input = document.getElementById("slot-file-input");
+  input.value = "";
+  input.click();
+}
+
+function handleSlotFileInput(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  uploadSlotFile(activeSlotIndex, file);
+}
+
+function slotDragOver(e, index) {
+  e.preventDefault();
+  document.getElementById(`slot-${index}`).style.borderColor = "var(--accent)";
+}
+function slotDragLeave(e, index) {
+  document.getElementById(`slot-${index}`).style.borderColor = "";
+}
+async function slotDrop(e, index) {
+  e.preventDefault();
+  document.getElementById(`slot-${index}`).style.borderColor = "";
+  const file = e.dataTransfer?.files[0];
+  if (file && file.type.startsWith("image/")) await uploadSlotFile(index, file);
+}
+
+async function uploadSlotFile(index, file) {
+  const ext = file.type.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+  const filename = `photo-${Date.now()}.${ext}`;
+  setStatus(`Uploading photo ${index + 1}...`);
+  try {
+    const res = await fetch("/api/upload-photo", {
+      method: "POST",
+      headers: { "Content-Type": file.type, "X-Filename": filename },
+      body: file,
+    });
+    const data = await res.json();
+    if (data.ok) {
+      photoSlots[index] = data.path;
+      renderSlot(index);
+      setStatus(`✓ Photo ${index + 1} uploaded`);
+      toast(`✓ Photo ${index + 1} uploaded`, "ok");
+    } else {
+      setStatus(`✗ Upload failed: ${data.error}`, true);
+      toast("✗ Upload failed", "err");
+    }
+  } catch(e) {
+    setStatus(`✗ ${e.message}`, true);
+  }
+}
+
+function removeSlotImage(index) {
+  photoSlots[index] = null;
+  renderSlot(index);
+}
+
+function renderSlot(index) {
+  const slot = document.getElementById(`slot-${index}`);
+  const img = document.getElementById(`slot-img-${index}`);
+  const path = photoSlots[index];
+  if (path) {
+    slot.classList.add("has-image");
+    img.src = `http://localhost:3001/public${path}`;
+    img.style.display = "block";
+    slot.querySelector(".slot-placeholder").style.display = "none";
+  } else {
+    slot.classList.remove("has-image");
+    img.src = "";
+    img.style.display = "none";
+    slot.querySelector(".slot-placeholder").style.display = "flex";
+  }
+}
+
+// ── Save photo ─────────────────────────────────────────────────────────────
+async function savePhoto() {
+  const title = document.getElementById("ph-title").value.trim();
+  const filename = document.getElementById("ph-filename").value.trim();
+  const date = document.getElementById("ph-date").value.trim();
+  const category = document.getElementById("ph-category").value;
+  const subject = document.getElementById("ph-subject").value.trim();
+  const desc = document.getElementById("ph-desc").value.trim();
+  const modelName = document.getElementById("ph-model-name").value.trim();
+  const modelIg = document.getElementById("ph-model-ig").value.trim();
+  const locationName = document.getElementById("ph-location-name").value.trim();
+  const locationIg = document.getElementById("ph-location-ig").value.trim();
+  const camera = document.getElementById("ph-camera").value.trim();
+  const lens = document.getElementById("ph-lens").value.trim();
+  const igUrl = document.getElementById("ph-ig-url").value.trim();
+
+  if (!title) { toast("✗ Title is required", "err"); return false; }
+  if (!filename) { toast("✗ Filename is required", "err"); return false; }
+
+  const images = photoSlots.filter(Boolean);
+
+  let fm = `---\ntitle: "${title}"\ndate: "${date || new Date().toISOString().slice(0,10)}"\ncategory: ${category}`;
+  if (images.length) fm += `\nimages:\n${images.map(i => `  - ${i}`).join("\n")}`;
+  if (subject) fm += `\nsubject: "${subject}"`;
+  if (desc) fm += `\ndescription: "${desc}"`;
+  if (igUrl) fm += `\nigUrl: "${igUrl}"`;
+  if (modelName) {
+    fm += `\nmodel:\n  name: "${modelName}"`;
+    if (modelIg) fm += `\n  ig: "${modelIg}"`;
+  }
+  if (locationName) {
+    fm += `\nlocation:\n  name: "${locationName}"`;
+    if (locationIg) fm += `\n  ig: "${locationIg}"`;
+  }
+  if (camera) fm += `\ncamera: "${camera}"`;
+  if (lens) fm += `\nlens: "${lens}"`;
+  fm += "\n---\n";
+
+  const safe = filename.endsWith(".md") ? filename : `${filename}.md`;
+  setStatus("Saving...");
+  try {
+    const res = await fetch("/api/save-photo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename: safe, content: fm }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setStatus(`✓ Saved: content/photos/${safe}`);
+      toast(`✓ Saved: ${safe}`, "ok");
+      editingPhotoSlug = safe.replace(".md", "");
+      allPhotos = await fetch("/api/photos").then(r => r.json());
+      checkPhSlug();
+      return true;
+    } else {
+      setStatus(`✗ ${data.error}`, true);
+      toast("✗ Save failed", "err");
+      return false;
+    }
+  } catch(e) {
+    setStatus(`✗ ${e.message}`, true);
+    toast("✗ Cannot reach server", "err");
+    return false;
+  }
+}
+
+// ── Publish photo ──────────────────────────────────────────────────────────
+async function publishPhoto() {
+  const saved = await savePhoto();
+  if (saved === false) return;
+
+  const slug = document.getElementById("ph-filename").value.replace(/\.md$/, "");
+  const title = document.getElementById("ph-title").value.trim();
+  if (!slug || !title) return toast("✗ Save the photo first", "err");
+
+  setStatus("Publishing...");
+  try {
+    const res = await fetch("/api/publish-photo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, title }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setStatus(`✓ ${data.message}`);
+      toast(`✓ ${data.message}`, "ok");
+    } else {
+      setStatus(`✗ ${data.error}`, true);
+      toast("✗ Publish failed", "err");
+    }
+  } catch(e) {
+    setStatus(`✗ ${e.message}`, true);
+    toast("✗ Cannot reach server", "err");
+  }
+}
+
+// ── Load photo ─────────────────────────────────────────────────────────────
+async function loadPhoto(slug) {
+  document.getElementById("open-panel").style.display = "none";
+  setStatus("Loading...");
+  try {
+    const data = await fetch(`/api/photo?slug=${encodeURIComponent(slug)}`).then(r => r.json());
+    if (data.error) { setStatus(`✗ ${data.error}`, true); return; }
+
+    // Parse nested YAML manually since parseFrontmatter doesn't handle objects
+    const rawLines = data.raw.split("\n");
+    const fm = {};
+    let inFront = false, inImages = false, inModel = false, inLocation = false;
+    const images = [];
+
+    for (const line of rawLines) {
+      if (line.trim() === "---") {
+        if (!inFront) { inFront = true; continue; }
+        else break;
+      }
+      if (!inFront) continue;
+
+      if (line.startsWith("  - ") && inImages) {
+        images.push(line.replace("  - ", "").trim());
+        continue;
+      }
+      if (!line.startsWith("  ")) { inImages = false; inModel = false; inLocation = false; }
+
+      if (line.startsWith("model:")) { inModel = true; inLocation = false; inImages = false; continue; }
+      if (line.startsWith("location:")) { inLocation = true; inModel = false; inImages = false; continue; }
+      if (line.startsWith("images:")) { inImages = true; inModel = false; inLocation = false; continue; }
+
+      if (inModel || inLocation) {
+        const [k, ...rest] = line.trim().split(":");
+        const v = rest.join(":").trim().replace(/^["']|["']$/g, "");
+        if (inModel) fm[`model.${k}`] = v;
+        else fm[`location.${k}`] = v;
+        continue;
+      }
+
+      const colon = line.indexOf(":");
+      if (colon === -1) continue;
+      const key = line.slice(0, colon).trim();
+      fm[key] = line.slice(colon + 1).trim().replace(/^["']|["']$/g, "");
+    }
+
+    document.getElementById("ph-title").value = fm.title || "";
+    document.getElementById("ph-filename").value = slug + ".md";
+    document.getElementById("ph-date").value = fm.date || "";
+    document.getElementById("ph-category").value = fm.category || "portrait";
+    document.getElementById("ph-subject").value = fm.subject || "";
+    document.getElementById("ph-desc").value = fm.description || "";
+    document.getElementById("ph-ig-url").value = fm.igUrl || "";
+    document.getElementById("ph-model-name").value = fm["model.name"] || "";
+    document.getElementById("ph-model-ig").value = fm["model.ig"] || "";
+    document.getElementById("ph-location-name").value = fm["location.name"] || "";
+    document.getElementById("ph-location-ig").value = fm["location.ig"] || "";
+    document.getElementById("ph-camera").value = fm.camera || "";
+    document.getElementById("ph-lens").value = fm.lens || "";
+
+    photoSlots = [null, null, null];
+    images.slice(0, 3).forEach((p, i) => { photoSlots[i] = p; });
+    [0, 1, 2].forEach(i => renderSlot(i));
+    onPhCategoryChange();
+
+    editingPhotoSlug = slug;
+    document.getElementById("ph-filename").readOnly = true;
+    document.getElementById("ph-filename").style.opacity = "0.6";
+    document.getElementById("editing-label").textContent = `✎ ${slug}.md`;
+    document.getElementById("btn-delete").style.display = "";
+    checkPhSlug();
+    setStatus(`✓ Loaded: ${slug}.md`);
+    toast(`✓ Loaded: ${slug}.md`, "ok");
+  } catch(e) {
+    setStatus(`✗ ${e.message}`, true);
+  }
+}
+
+// ── New photo ──────────────────────────────────────────────────────────────
+function newPhoto() {
+  ["ph-title","ph-filename","ph-subject","ph-desc","ph-model-name","ph-model-ig",
+   "ph-location-name","ph-location-ig","ph-camera","ph-lens","ph-ig-url"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  document.getElementById("ph-filename").readOnly = false;
+  document.getElementById("ph-filename").style.opacity = "1";
+  document.getElementById("ph-date").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("ph-category").value = "portrait";
+  document.getElementById("editing-label").textContent = "";
+  document.getElementById("ph-slug-status").textContent = "—";
+  document.getElementById("ph-slug-status").style.color = "var(--muted)";
+  document.getElementById("btn-delete").style.display = "none";
+  photoSlots = [null, null, null];
+  [0, 1, 2].forEach(i => renderSlot(i));
+  onPhCategoryChange();
+  editingPhotoSlug = null;
+  setStatus("Ready");
+  document.getElementById("ph-title").focus();
 }
 
 // ── Start ──────────────────────────────────────────────────────────────────

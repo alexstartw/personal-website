@@ -18,11 +18,15 @@ const ROOT = path.join(__dirname, "..");
 const POSTS_DIR = path.join(ROOT, "content", "posts");
 const COVERS_DIR = path.join(ROOT, "public", "images", "posts", "covers");
 const CONTENT_IMG_DIR = path.join(ROOT, "public", "images", "posts", "content");
+const PHOTOS_DIR = path.join(ROOT, "content", "photos");
+const PHOTOS_IMG_DIR = path.join(ROOT, "public", "images", "photos");
 
 // Ensure dirs exist
-[POSTS_DIR, COVERS_DIR, CONTENT_IMG_DIR].forEach((d) => {
-  if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
-});
+[POSTS_DIR, COVERS_DIR, CONTENT_IMG_DIR, PHOTOS_DIR, PHOTOS_IMG_DIR].forEach(
+  (d) => {
+    if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+  },
+);
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -195,6 +199,118 @@ async function handleUploadImage(req, res) {
   json(res, { ok: true, path: `/images/posts/content/${filename}` });
 }
 
+// ── Photo handlers ────────────────────────────────────────────────────────────
+
+function handleGetPhotos(res) {
+  const files = fs.existsSync(PHOTOS_DIR)
+    ? fs.readdirSync(PHOTOS_DIR).filter((f) => f.endsWith(".md"))
+    : [];
+  const works = files.map((f) => {
+    const raw = fs.readFileSync(path.join(PHOTOS_DIR, f), "utf-8");
+    const slug = f.replace(/\.md$/, "");
+    let title = slug,
+      category = "portrait";
+    let inFront = false;
+    for (const line of raw.split("\n")) {
+      if (line.trim() === "---") {
+        if (!inFront) {
+          inFront = true;
+          continue;
+        } else break;
+      }
+      if (!inFront) continue;
+      if (line.startsWith("title:"))
+        title = line
+          .replace("title:", "")
+          .trim()
+          .replace(/^["']|["']$/g, "");
+      if (line.startsWith("category:"))
+        category = line.replace("category:", "").trim();
+    }
+    return { slug, title, category };
+  });
+  json(res, works);
+}
+
+function handleGetPhoto(req, res) {
+  const { query } = url.parse(req.url, true);
+  const slug = query.slug;
+  if (!slug) return json(res, { error: "Missing slug" }, 400);
+  const filepath = path.join(PHOTOS_DIR, `${slug}.md`);
+  if (!fs.existsSync(filepath)) return json(res, { error: "Not found" }, 404);
+  json(res, { raw: fs.readFileSync(filepath, "utf-8") });
+}
+
+async function handleSavePhoto(req, res) {
+  const buf = await readBody(req);
+  const { filename, content } = JSON.parse(buf.toString());
+  if (!filename || !content)
+    return json(res, { error: "Missing filename or content" }, 400);
+  const safe = filename.endsWith(".md") ? filename : `${filename}.md`;
+  fs.writeFileSync(path.join(PHOTOS_DIR, safe), content, "utf-8");
+  json(res, { ok: true });
+}
+
+async function handleUploadPhoto(req, res) {
+  const filename = req.headers["x-filename"] || `photo-${Date.now()}.jpg`;
+  const buf = await readBody(req);
+  const dest = path.join(PHOTOS_IMG_DIR, filename);
+  fs.writeFileSync(dest, buf);
+  // Resize with sips (macOS)
+  const { execSync } = require("child_process");
+  try {
+    execSync(`sips -Z 2400 "${dest}" --out "${dest}"`, { stdio: "ignore" });
+  } catch (_) {}
+  json(res, { ok: true, path: `/images/photos/${filename}` });
+}
+
+async function handleDeletePost(req, res) {
+  const buf = await readBody(req);
+  const { slug } = JSON.parse(buf.toString());
+  if (!slug) return json(res, { error: "Missing slug" }, 400);
+  const filepath = path.join(POSTS_DIR, `${slug}.md`);
+  if (!fs.existsSync(filepath)) return json(res, { error: "Not found" }, 404);
+  fs.unlinkSync(filepath);
+  json(res, { ok: true });
+}
+
+async function handleDeletePhoto(req, res) {
+  const buf = await readBody(req);
+  const { slug } = JSON.parse(buf.toString());
+  if (!slug) return json(res, { error: "Missing slug" }, 400);
+  const filepath = path.join(PHOTOS_DIR, `${slug}.md`);
+  if (!fs.existsSync(filepath)) return json(res, { error: "Not found" }, 404);
+  fs.unlinkSync(filepath);
+  json(res, { ok: true });
+}
+
+async function handlePublishPhoto(req, res) {
+  const buf = await readBody(req);
+  const { slug, title } = JSON.parse(buf.toString());
+  if (!slug || !title)
+    return json(res, { error: "Missing slug or title" }, 400);
+
+  function run(cmd) {
+    return new Promise((resolve, reject) => {
+      exec(cmd, { cwd: ROOT }, (err, stdout, stderr) => {
+        if (err) reject(new Error(stderr || err.message));
+        else resolve(stdout.trim());
+      });
+    });
+  }
+
+  try {
+    await run(`git add "content/photos/${slug}.md" "public/images/photos"`);
+    const staged = await run("git diff --cached --name-only");
+    if (!staged) return json(res, { ok: true, message: "Nothing to commit" });
+    await run(`git commit -m "photo: ${title.replace(/"/g, "'")}"`);
+    await run("git push");
+    json(res, { ok: true, message: "Published!" });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
 async function handlePublish(req, res) {
   const buf = await readBody(req);
   const { slug, title } = JSON.parse(buf.toString());
@@ -256,6 +372,20 @@ const server = http.createServer(async (req, res) => {
       return await handleUploadImage(req, res);
     if (pathname === "/api/publish" && req.method === "POST")
       return await handlePublish(req, res);
+    if (pathname === "/api/photos" && req.method === "GET")
+      return handleGetPhotos(res);
+    if (pathname === "/api/photo" && req.method === "GET")
+      return handleGetPhoto(req, res);
+    if (pathname === "/api/save-photo" && req.method === "POST")
+      return await handleSavePhoto(req, res);
+    if (pathname === "/api/upload-photo" && req.method === "POST")
+      return await handleUploadPhoto(req, res);
+    if (pathname === "/api/publish-photo" && req.method === "POST")
+      return await handlePublishPhoto(req, res);
+    if (pathname === "/api/delete-post" && req.method === "POST")
+      return await handleDeletePost(req, res);
+    if (pathname === "/api/delete-photo" && req.method === "POST")
+      return await handleDeletePhoto(req, res);
 
     // Serve static files from /public/
     if (pathname.startsWith("/public/")) {
