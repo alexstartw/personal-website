@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, ImageOff } from "lucide-react";
 import { CinematicSlideshow } from "./CinematicSlideshow";
 import type { PhotoWork } from "@/types/photo";
+import { img } from "@/lib/utils";
 
 interface GalleryGridProps {
   works: PhotoWork[];
@@ -19,7 +20,7 @@ function PhotoCard({
   onOpen: (work: PhotoWork) => void;
 }) {
   const [imgError, setImgError] = useState(false);
-  const primaryImage = work.images[0];
+  const primaryImage = work.images[0] ? img(work.images[0]) : undefined;
 
   return (
     <motion.div

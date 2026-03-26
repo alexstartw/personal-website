@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getPhotoWorksByCategory } from "@/lib/photos";
 import { GalleryGrid } from "@/components/photo/GalleryGrid";
 
-export const metadata: Metadata = { title: "Coser" };
+export const metadata: Metadata = {
+  title: "Coser",
+  description:
+    "Cosplay photography series by Alex Lin — creative character portraits and costume shoots in Taipei, Taiwan.",
+};
 
 export default function CoserPage() {
   const works = getPhotoWorksByCategory("coser");

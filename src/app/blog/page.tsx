@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { getAllPostMetas, getPostBySlug } from "@/lib/posts";
 import { BlogPageClient } from "@/components/blog/BlogPageClient";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Blog",
-  description: "Technical articles and notes",
+  description:
+    "Technical writing on data engineering, GenAI, cloud infrastructure, and software development. Notes and deep-dives by Alex Lin.",
 };
 
 export default async function BlogPage() {

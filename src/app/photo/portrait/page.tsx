@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getPhotoWorksByCategory } from "@/lib/photos";
 import { GalleryGrid } from "@/components/photo/GalleryGrid";
 
-export const metadata: Metadata = { title: "Portrait" };
+export const metadata: Metadata = {
+  title: "Portrait",
+  description:
+    "Portrait photography series by Alex Lin — candid and studio portraits captured in Taipei, Taiwan.",
+};
 
 export default function PortraitPage() {
   const works = getPhotoWorksByCategory("portrait");

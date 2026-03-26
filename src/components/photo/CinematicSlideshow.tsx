@@ -15,6 +15,7 @@ import {
   Pause,
 } from "lucide-react";
 import type { PhotoWork } from "@/types/photo";
+import { img } from "@/lib/utils";
 
 // ── Metadata bar ──────────────────────────────────────────────────────────────
 function MetaBar({ work, uiVisible }: { work: PhotoWork; uiVisible: boolean }) {
@@ -142,7 +143,7 @@ interface CinematicSlideshowProps {
 }
 
 export function CinematicSlideshow({ work, onClose }: CinematicSlideshowProps) {
-  const images = work.images.slice(0, 3);
+  const images = work.images.slice(0, 3).map(img);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [uiVisible, setUiVisible] = useState(true);

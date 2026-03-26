@@ -14,8 +14,6 @@ import {
   Camera,
   Star,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { LangToggle } from "@/components/ui/LangToggle";
 import { AppleDock, AppleDockIcon } from "@/components/ui/apple-dock";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSiteMode } from "@/context/SiteModeContext";
@@ -237,10 +235,6 @@ export function Navbar() {
               ))}
             </AppleDock>
           </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-          </div>
         </nav>
       </motion.header>
     );
@@ -331,8 +325,6 @@ export function Navbar() {
 
         {/* Controls */}
         <div className="flex items-center gap-2 shrink-0">
-          <LangToggle />
-          <ThemeToggle />
           {!isHome && (
             <button
               className="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-full hover:bg-[var(--border)] transition-colors"

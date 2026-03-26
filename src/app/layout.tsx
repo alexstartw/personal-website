@@ -3,9 +3,11 @@ import { Instrument_Serif, Cormorant_Garamond } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { SiteModeProvider } from "@/context/SiteModeContext";
+import { FontSizeProvider } from "@/context/FontSizeContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { ModeTransitionOverlay } from "@/components/ui/ModeTransitionOverlay";
+import { SettingsBubble } from "@/components/ui/SettingsBubble";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -57,12 +59,15 @@ export default function RootLayout({
           enableSystem={false}
         >
           <LanguageProvider>
-            <SiteModeProvider>
-              <ModeTransitionOverlay />
-              <Navbar />
-              <main>{children}</main>
-              <ConditionalFooter />
-            </SiteModeProvider>
+            <FontSizeProvider>
+              <SiteModeProvider>
+                <ModeTransitionOverlay />
+                <Navbar />
+                <main>{children}</main>
+                <ConditionalFooter />
+                <SettingsBubble />
+              </SiteModeProvider>
+            </FontSizeProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>
