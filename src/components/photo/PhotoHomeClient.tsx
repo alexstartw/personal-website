@@ -75,18 +75,22 @@ function CategoryCard({
 interface PhotoHomeClientProps {
   portraitWorks: PhotoWork[];
   coserWorks: PhotoWork[];
+  portraitCoverSrc?: string;
+  coserCoverSrc?: string;
 }
 
 export function PhotoHomeClient({
   portraitWorks,
   coserWorks,
+  portraitCoverSrc,
+  coserCoverSrc,
 }: PhotoHomeClientProps) {
-  const portraitCover = portraitWorks[0]?.images[0]
-    ? img(portraitWorks[0].images[0])
-    : undefined;
-  const coserCover = coserWorks[0]?.images[0]
-    ? img(coserWorks[0].images[0])
-    : undefined;
+  const portraitCover =
+    portraitCoverSrc ??
+    (portraitWorks[0]?.images[0] ? img(portraitWorks[0].images[0]) : undefined);
+  const coserCover =
+    coserCoverSrc ??
+    (coserWorks[0]?.images[0] ? img(coserWorks[0].images[0]) : undefined);
 
   return (
     <div className="min-h-screen pt-14 flex flex-col">
