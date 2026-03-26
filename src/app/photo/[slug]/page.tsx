@@ -73,7 +73,7 @@ export default async function PhotoWorkPage({ params }: Props) {
               className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[var(--card)]"
             >
               <Image
-                src={src}
+                src={img(src)}
                 alt={`${work.title} ${i + 1}`}
                 fill
                 className="object-cover"
