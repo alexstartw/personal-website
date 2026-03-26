@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const SOCIALS = [
   {
@@ -25,7 +28,16 @@ const SOCIALS = [
     label: "Email",
     href: "mailto:alexstartw@gmail.com",
     icon: (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <rect x="2" y="4" width="20" height="16" rx="2" />
         <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
       </svg>
@@ -33,13 +45,22 @@ const SOCIALS = [
   },
 ];
 
-const SEGMENTS = [
+const ENGINEER_SEGMENTS = [
   { label: "Data Engineering" },
   { label: "GenAI" },
   { label: "Taipei, Taiwan" },
 ];
 
+const PHOTO_SEGMENTS = [
+  { label: "Portrait Photography" },
+  { label: "Cosplay Photography" },
+  { label: "Taipei, Taiwan" },
+];
+
 export function Footer() {
+  const pathname = usePathname();
+  const isPhotoMode = pathname.startsWith("/photo");
+  const segments = isPhotoMode ? PHOTO_SEGMENTS : ENGINEER_SEGMENTS;
   const year = new Date().getFullYear();
 
   return (
@@ -48,7 +69,6 @@ export function Footer() {
       <div className="h-px w-full bg-gradient-to-r from-transparent via-[var(--accent)]/30 to-transparent" />
 
       <div className="max-w-5xl mx-auto px-6 h-11 flex items-center gap-3 text-[10px] font-mono">
-
         {/* Terminal prompt */}
         <span className="flex items-center gap-1 shrink-0">
           <span className="text-[var(--accent)]">alex</span>
@@ -61,10 +81,10 @@ export function Footer() {
 
         {/* Specialisation tags */}
         <div className="hidden sm:flex items-center gap-2">
-          {SEGMENTS.map((seg, i) => (
+          {segments.map((seg, i) => (
             <span key={seg.label} className="flex items-center gap-2">
               <span className="text-[var(--muted)]/50">{seg.label}</span>
-              {i < SEGMENTS.length - 1 && (
+              {i < segments.length - 1 && (
                 <span className="text-[var(--border)]">·</span>
               )}
             </span>
