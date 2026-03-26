@@ -12,6 +12,8 @@ export type MenuItem = {
   id: number;
   label: string;
   icon: LucideIcon;
+  /** CSS color value — e.g. "#fb923c" or "var(--accent)" */
+  color?: string;
 };
 
 type RadialMenuProps = {
@@ -28,18 +30,13 @@ type RadialMenuProps = {
 
 type Point = { x: number; y: number };
 
-// ─── Animation ───────────────────────────────────────────────────────────────
+// ─── Transitions ─────────────────────────────────────────────────────────────
 
 const menuTransition: Transition = {
   type: "spring",
   stiffness: 420,
   damping: 32,
   mass: 1,
-};
-
-const wedgeTransition: Transition = {
-  duration: 0.05,
-  ease: "easeOut",
 };
 
 // ─── Geometry ────────────────────────────────────────────────────────────────
@@ -154,13 +151,13 @@ function RadialMenu({
             >
               <ContextMenu.Popup
                 style={{ width: size, height: size }}
-                className="relative overflow-hidden rounded-full shadow-xl outline-none"
+                className="relative overflow-hidden rounded-full shadow-2xl outline-none"
                 render={
                   <motion.div
                     className="absolute inset-0"
-                    initial={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, scale: 0.4 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    exit={{ opacity: 0, scale: 0.4 }}
                     transition={menuTransition}
                   />
                 }
@@ -176,8 +173,9 @@ function RadialMenu({
                       iconRingRadius,
                       midDeg,
                     );
-                    const ICON_BOX = iconSize * 2;
+                    const ICON_BOX = iconSize * 2.8;
                     const isActive = activeIndex === index;
+                    const itemColor = item.color ?? "currentColor";
 
                     return (
                       <g
@@ -188,8 +186,20 @@ function RadialMenu({
                           setActiveIndex(index);
                           itemRefs.current[index]?.focus();
                         }}
+                        onMouseLeave={() => setActiveIndex(null)}
                       >
-                        {/* Outer ring segment */}
+                        {/* ── Outer ring segment (base) */}
+                        <path
+                          d={slicePath(
+                            index,
+                            menuItems.length,
+                            outerRingOuterRadius,
+                            outerRingInnerRadius,
+                          )}
+                          className="fill-[var(--card)]"
+                        />
+
+                        {/* ── Outer ring segment (color overlay on hover) */}
                         <motion.path
                           d={slicePath(
                             index,
@@ -197,19 +207,24 @@ function RadialMenu({
                             outerRingOuterRadius,
                             outerRingInnerRadius,
                           )}
-                          className={cn(
-                            isActive
-                              ? "fill-[var(--accent)]/20"
-                              : "fill-[var(--card)]",
-                          )}
+                          fill={itemColor}
                           initial={false}
-                          animate={{
-                            opacity: 1,
-                          }}
-                          transition={wedgeTransition}
+                          animate={{ opacity: isActive ? 0.12 : 0 }}
+                          transition={{ duration: 0.18, ease: "easeOut" }}
                         />
 
-                        {/* Inner band segment */}
+                        {/* ── Inner band (base) */}
+                        <path
+                          d={slicePath(
+                            index,
+                            menuItems.length,
+                            wedgeOuterRadius,
+                            wedgeInnerRadius,
+                          )}
+                          className="fill-[var(--card)] stroke-[var(--border)] stroke-[0.5]"
+                        />
+
+                        {/* ── Inner band (color overlay on hover) */}
                         <motion.path
                           d={slicePath(
                             index,
@@ -217,17 +232,13 @@ function RadialMenu({
                             wedgeOuterRadius,
                             wedgeInnerRadius,
                           )}
-                          className={cn(
-                            "stroke-[var(--border)] stroke-1",
-                            isActive
-                              ? "fill-[var(--border)]"
-                              : "fill-[var(--card)]",
-                          )}
+                          fill={itemColor}
                           initial={false}
-                          transition={wedgeTransition}
+                          animate={{ opacity: isActive ? 0.15 : 0 }}
+                          transition={{ duration: 0.18, ease: "easeOut" }}
                         />
 
-                        {/* Icon */}
+                        {/* ── Icon inside foreignObject */}
                         <foreignObject
                           x={iconX - ICON_BOX / 2}
                           y={iconY - ICON_BOX / 2}
@@ -236,51 +247,60 @@ function RadialMenu({
                         >
                           <ContextMenu.Item
                             ref={(el) => {
-                              itemRefs.current[index] = el as HTMLElement | null;
+                              itemRefs.current[index] =
+                                el as HTMLElement | null;
                             }}
                             onFocus={() => setActiveIndex(index)}
                             onClick={() => onSelect?.(item)}
                             aria-label={item.label}
-                            className={cn(
-                              "flex size-full items-center justify-center rounded-full outline-none transition-colors duration-100",
-                              isActive
-                                ? "text-[var(--accent)]"
-                                : "text-[var(--muted)]",
-                            )}
+                            className="flex size-full items-center justify-center rounded-full outline-none"
                           >
-                            <Icon style={{ height: iconSize, width: iconSize }} />
+                            <motion.div
+                              initial={false}
+                              animate={{
+                                scale: isActive ? 1.22 : 1,
+                                filter: isActive
+                                  ? `drop-shadow(0 0 6px ${itemColor}99)`
+                                  : "drop-shadow(0 0 0px transparent)",
+                              }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 500,
+                                damping: 28,
+                                mass: 0.8,
+                              }}
+                              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                            >
+                              <Icon
+                                style={{
+                                  height: iconSize,
+                                  width: iconSize,
+                                  color: itemColor,
+                                  strokeWidth: 1.8,
+                                  transition: "opacity 0.15s ease",
+                                  opacity: isActive ? 1 : 0.7,
+                                }}
+                              />
+                            </motion.div>
                           </ContextMenu.Item>
                         </foreignObject>
-
-                        {/* Label on hover */}
-                        {isActive && (
-                          <text
-                            x={polarToCartesian(wedgeOuterRadius + outerRingWidth / 2 + outerGap, midDeg).x}
-                            y={polarToCartesian(wedgeOuterRadius + outerRingWidth / 2 + outerGap, midDeg).y}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fontSize="8"
-                            className="fill-[var(--muted)] pointer-events-none select-none"
-                          >
-                            {item.label}
-                          </text>
-                        )}
                       </g>
                     );
                   })}
 
-                  {/* Center circle */}
+                  {/* ── Center dot */}
                   <circle
                     cx={0}
                     cy={0}
                     r={centerRadius}
-                    className="fill-[var(--background)] stroke-[var(--border)] stroke-1 opacity-80"
+                    className="fill-[var(--background)] stroke-[var(--border)] stroke-[0.5]"
+                    style={{ opacity: 0.85 }}
                   />
                   <circle
                     cx={0}
                     cy={0}
-                    r={3}
-                    className="fill-none stroke-[var(--border)]"
+                    r={2.5}
+                    className="fill-[var(--border)]"
                   />
                 </svg>
               </ContextMenu.Popup>
