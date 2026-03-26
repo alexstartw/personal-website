@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
 import { img } from "@/lib/utils";
+import { InstagramEmbedLoader } from "@/components/blog/InstagramEmbedLoader";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -93,6 +94,7 @@ export default async function BlogPostPage({ params }: Props) {
           className="prose-blog"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
+        {post.content.includes("instagram-media") && <InstagramEmbedLoader />}
       </div>
     </div>
   );

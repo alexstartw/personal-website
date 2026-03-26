@@ -9,6 +9,7 @@ import {
 } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export type FocusRailItem = {
   id: string | number;
@@ -54,6 +55,7 @@ export function FocusRail({
   interval = 4000,
   className,
 }: FocusRailProps) {
+  const router = useRouter();
   const [active, setActive] = React.useState(initialIndex);
   const [isHovering, setIsHovering] = React.useState(false);
   const lastWheelTime = React.useRef<number>(0);
@@ -192,6 +194,7 @@ export function FocusRail({
                   width: 280,
                   aspectRatio: "4/3",
                   transformStyle: "preserve-3d",
+                  cursor: isCenter && item.href ? "pointer" : undefined,
                 }}
                 initial={false}
                 animate={{
@@ -205,6 +208,7 @@ export function FocusRail({
                 transition={isCenter ? TAP_SPRING : BASE_SPRING}
                 onClick={() => {
                   if (offset !== 0) setActive((p) => p + offset);
+                  else if (item.href) router.push(item.href);
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}

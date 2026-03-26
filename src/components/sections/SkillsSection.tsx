@@ -118,11 +118,11 @@ const CATEGORY_ORDER = ["backend", "data", "cloud", "tools"] as const;
 
 const CATEGORY_STYLE = {
   backend: {
-    label: "text-[var(--accent)]",
-    prompt: "text-[var(--accent)]/80",
-    glow: "hover:text-[var(--accent)] hover:[text-shadow:0_0_8px_var(--accent)]",
-    border: "border-[var(--accent)]/20",
-    bg: "hover:bg-[var(--accent)]/5",
+    label: "text-yellow-400",
+    prompt: "text-yellow-400/70",
+    glow: "hover:text-yellow-300 hover:[text-shadow:0_0_8px_#facc15]",
+    border: "border-yellow-400/20",
+    bg: "hover:bg-yellow-400/5",
   },
   data: {
     label: "text-blue-400",
@@ -212,9 +212,14 @@ export function SkillsSection() {
                         ${group.style.glow}
                         opacity-0 animate-fade-in
                       `}
-                      style={{ animationDelay: `${0.3 + gi * 0.08 + si * 0.04}s`, animationFillMode: "forwards" }}
+                      style={{
+                        animationDelay: `${0.3 + gi * 0.08 + si * 0.04}s`,
+                        animationFillMode: "forwards",
+                      }}
                     >
-                      <span className={`${group.style.prompt} select-none`}>&gt;</span>
+                      <span className={`${group.style.prompt} select-none`}>
+                        &gt;
+                      </span>
                       <span>{sk.name}</span>
                     </div>
                   ))}
