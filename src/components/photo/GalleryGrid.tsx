@@ -7,6 +7,7 @@ import { ExternalLink, ImageOff } from "lucide-react";
 import { CinematicSlideshow } from "./CinematicSlideshow";
 import type { PhotoWork } from "@/types/photo";
 import { img } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface GalleryGridProps {
   works: PhotoWork[];
@@ -88,12 +89,13 @@ function PhotoCard({
 
 export function GalleryGrid({ works }: GalleryGridProps) {
   const [lightboxWork, setLightboxWork] = useState<PhotoWork | null>(null);
+  const { t } = useLanguage();
 
   if (works.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-[var(--muted)]">
         <ImageOff className="w-10 h-10 mb-3 opacity-40" />
-        <p className="text-sm">No works yet — check back soon.</p>
+        <p className="text-sm">{t.photo.no_works}</p>
       </div>
     );
   }
