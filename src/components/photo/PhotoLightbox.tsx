@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import type { PhotoWork } from "@/types/photo";
+import { img } from "@/lib/utils";
 
 interface PhotoLightboxProps {
   work: PhotoWork;
@@ -86,7 +87,7 @@ export function PhotoLightbox({
               style={{ maxHeight: "70vh" }}
             >
               <Image
-                src={work.images[index]}
+                src={img(work.images[index])}
                 alt={work.title}
                 width={1200}
                 height={800}
