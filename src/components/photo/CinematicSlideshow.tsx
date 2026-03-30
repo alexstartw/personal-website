@@ -16,9 +16,11 @@ import {
 } from "lucide-react";
 import type { PhotoWork } from "@/types/photo";
 import { img } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
 
 // ── Metadata bar ──────────────────────────────────────────────────────────────
 function MetaBar({ work, uiVisible }: { work: PhotoWork; uiVisible: boolean }) {
+  const { t } = useLanguage();
   const hasCredits =
     work.model || work.location || work.camera || work.lens || work.igUrl;
 
@@ -126,7 +128,7 @@ function MetaBar({ work, uiVisible }: { work: PhotoWork; uiVisible: boolean }) {
                 className="flex items-center gap-1.5 text-xs font-mono text-[#c8a882] hover:text-[#e0c8aa] transition-colors mt-1"
               >
                 <ExternalLink className="w-3 h-3" strokeWidth={1.5} />
-                View on Instagram
+                {t.photo.view_on_ig}
               </a>
             )}
           </div>
@@ -209,7 +211,7 @@ export function CinematicSlideshow({ work, onClose }: CinematicSlideshowProps) {
   // Auto-play
   useEffect(() => {
     if (autoPlay && images.length > 1) {
-      autoPlayTimer.current = setInterval(() => go(1), 4000);
+      autoPlayTimer.current = setInterval(() => go(1), 2500);
     }
     return () => {
       if (autoPlayTimer.current) clearInterval(autoPlayTimer.current);
@@ -311,7 +313,7 @@ export function CinematicSlideshow({ work, onClose }: CinematicSlideshowProps) {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
             className="absolute inset-0 flex items-center justify-center"
             style={{ paddingBottom: "5rem", paddingTop: "3rem" }}
           >

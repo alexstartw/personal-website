@@ -41,13 +41,40 @@ function formatDate(iso: string) {
   });
 }
 
+const BASE = "https://alexstartw.github.io/personal-website";
+
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   const post = await getPostBySlug(decodeURIComponent(slug));
   if (!post) notFound();
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    author: {
+      "@type": "Person",
+      name: "Li-Yu Alex Lin",
+      url: BASE,
+    },
+    publisher: {
+      "@type": "Person",
+      name: "Li-Yu Alex Lin",
+      url: BASE,
+    },
+    url: `${BASE}/blog/${encodeURIComponent(slug)}`,
+    ...(post.cover ? { image: img(post.cover) } : {}),
+    keywords: post.tags.join(", "),
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)] pt-14">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       {/* Cover image */}
       {post.cover && (
         <div className="w-full h-48 md:h-64 overflow-hidden">

@@ -3,10 +3,14 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Camera, Star, ImageOff } from "lucide-react";
+import { Camera, Star, ImageOff, Instagram } from "lucide-react";
 import type { PhotoWork } from "@/types/photo";
 import { img } from "@/lib/utils";
 import { useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
+
+const PHOTOGRAPHER_IG = "https://www.instagram.com/yu_._photographer/";
+const PHOTOGRAPHER_IG_HANDLE = "@yu_._photographer";
 
 interface CategoryCardProps {
   label: string;
@@ -14,6 +18,7 @@ interface CategoryCardProps {
   icon: React.ElementType;
   count: number;
   coverImage?: string;
+  viewGalleryLabel: string;
 }
 
 function CategoryCard({
@@ -22,6 +27,7 @@ function CategoryCard({
   icon: Icon,
   count,
   coverImage,
+  viewGalleryLabel,
 }: CategoryCardProps) {
   const router = useRouter();
   const [imgError, setImgError] = useState(false);
@@ -62,7 +68,7 @@ function CategoryCard({
         </div>
         <h2 className="text-2xl font-semibold text-white">{label}</h2>
         <div className="mt-3 flex items-center gap-1.5 text-white/60 text-sm group-hover:text-white/90 transition-colors duration-300">
-          View gallery
+          {viewGalleryLabel}
           <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
             →
           </span>
@@ -85,6 +91,7 @@ export function PhotoHomeClient({
   portraitCoverSrc,
   coserCoverSrc,
 }: PhotoHomeClientProps) {
+  const { t } = useLanguage();
   const portraitCover =
     portraitCoverSrc ??
     (portraitWorks[0]?.images[0] ? img(portraitWorks[0].images[0]) : undefined);
@@ -102,7 +109,7 @@ export function PhotoHomeClient({
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-xs font-mono tracking-[0.2em] uppercase text-[var(--accent)] mb-4"
         >
-          Photography
+          {t.photo.label}
         </motion.p>
 
         <motion.h1
@@ -120,7 +127,7 @@ export function PhotoHomeClient({
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-[var(--muted)] text-base max-w-sm"
         >
-          Portrait & Cosplay Photography — Taipei, Taiwan
+          {t.photo.subtitle}
         </motion.p>
       </div>
 
@@ -129,22 +136,56 @@ export function PhotoHomeClient({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.5 }}
-        className="max-w-3xl mx-auto w-full px-6 pb-16 grid grid-cols-1 sm:grid-cols-2 gap-4"
+        className="max-w-3xl mx-auto w-full px-6 grid grid-cols-1 sm:grid-cols-2 gap-4"
       >
         <CategoryCard
-          label="Portrait"
+          label={t.photo.portrait}
           href="/photo/portrait"
           icon={Camera}
           count={portraitWorks.length}
           coverImage={portraitCover}
+          viewGalleryLabel={t.photo.view_gallery}
         />
         <CategoryCard
-          label="Coser"
+          label={t.photo.coser}
           href="/photo/coser"
           icon={Star}
           count={coserWorks.length}
           coverImage={coserCover}
+          viewGalleryLabel={t.photo.view_gallery}
         />
+      </motion.div>
+
+      {/* Instagram CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.65 }}
+        className="max-w-3xl mx-auto w-full px-6 pb-16 mt-6"
+      >
+        <a
+          href={PHOTOGRAPHER_IG}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center justify-between w-full px-6 py-4 rounded-2xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)]/40 transition-all duration-300"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#f9a825] via-[#e91e8c] to-[#9c27b0] flex items-center justify-center shrink-0">
+              <Instagram className="w-4 h-4 text-white" strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[var(--foreground)]">
+                {t.photo.ig_cta_title}
+              </p>
+              <p className="text-xs text-[var(--muted)] mt-0.5">
+                {PHOTOGRAPHER_IG_HANDLE}
+              </p>
+            </div>
+          </div>
+          <span className="text-xs text-[var(--muted)] group-hover:text-[var(--accent)] transition-colors duration-200">
+            {t.photo.ig_cta_button}
+          </span>
+        </a>
       </motion.div>
     </div>
   );

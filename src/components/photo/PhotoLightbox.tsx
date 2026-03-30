@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
@@ -19,16 +19,24 @@ export function PhotoLightbox({
   onClose,
 }: PhotoLightboxProps) {
   const [index, setIndex] = useState(initialIndex);
+  const [direction, setDirection] = useState(0);
   const hasMultiple = work.images.length > 1;
+  const touchStartX = useRef<number | null>(null);
 
-  const prev = useCallback(
-    () => setIndex((i) => (i - 1 + work.images.length) % work.images.length),
-    [work.images.length],
-  );
-  const next = useCallback(
-    () => setIndex((i) => (i + 1) % work.images.length),
-    [work.images.length],
-  );
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setIndex((i) => (i - 1 + work.images.length) % work.images.length);
+  }, [work.images.length]);
+
+  const next = useCallback(() => {
+    setDirection(1);
+    setIndex((i) => (i + 1) % work.images.length);
+  }, [work.images.length]);
+
+  const goTo = useCallback((i: number, current: number) => {
+    setDirection(i > current ? 1 : -1);
+    setIndex(i);
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
@@ -44,10 +52,27 @@ export function PhotoLightbox({
   // Prevent body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, []);
+
+  // Touch swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) > 40 && hasMultiple) {
+      delta < 0 ? next() : prev();
+    }
+    touchStartX.current = null;
+  };
+
+  const variants = {
+    enter: (d: number) => ({ opacity: 0, x: d > 0 ? 48 : -48 }),
+    center: { opacity: 1, x: 0 },
+    exit: (d: number) => ({ opacity: 0, x: d > 0 ? -48 : 48 }),
+  };
 
   return (
     <motion.div
@@ -55,7 +80,7 @@ export function PhotoLightbox({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.15 }}
     >
       {/* Backdrop */}
       <div
@@ -65,25 +90,41 @@ export function PhotoLightbox({
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center w-full max-w-4xl mx-4 max-h-screen">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-0 right-0 -translate-y-12 p-2 text-white/60 hover:text-white transition-colors"
-          aria-label="Close"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Top bar: counter + close */}
+        <div className="absolute top-0 left-0 right-0 -translate-y-12 flex items-center justify-between px-1">
+          {hasMultiple ? (
+            <span className="text-white/50 text-xs font-mono tracking-wider">
+              {index + 1} / {work.images.length}
+            </span>
+          ) : (
+            <span />
+          )}
+          <button
+            onClick={onClose}
+            className="p-2 text-white/50 hover:text-white transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Image */}
-        <div className="relative w-full" style={{ maxHeight: "70vh" }}>
-          <AnimatePresence mode="wait">
+        <div
+          className="relative w-full overflow-hidden"
+          style={{ maxHeight: "70vh" }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={index}
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.2 }}
-              className="relative w-full h-full"
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+              className="relative w-full"
               style={{ maxHeight: "70vh" }}
             >
               <Image
@@ -104,12 +145,14 @@ export function PhotoLightbox({
               <button
                 onClick={prev}
                 className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/40 rounded-full text-white/70 hover:text-white hover:bg-black/60 transition-colors"
+                aria-label="Previous"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={next}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/40 rounded-full text-white/70 hover:text-white hover:bg-black/60 transition-colors"
+                aria-label="Next"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -117,8 +160,34 @@ export function PhotoLightbox({
           )}
         </div>
 
+        {/* Thumbnail strip */}
+        {hasMultiple && (
+          <div className="flex gap-2 mt-3">
+            {work.images.map((src, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i, index)}
+                aria-label={`Photo ${i + 1}`}
+                className={[
+                  "relative w-14 h-14 rounded-md overflow-hidden shrink-0 transition-all duration-150",
+                  i === index
+                    ? "ring-2 ring-white opacity-100"
+                    : "opacity-40 hover:opacity-70",
+                ].join(" ")}
+              >
+                <Image
+                  src={img(src)}
+                  alt={`${work.title} ${i + 1}`}
+                  fill
+                  className="object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Meta */}
-        <div className="mt-4 w-full flex items-center justify-between px-1">
+        <div className="mt-3 w-full flex items-center justify-between px-1">
           <div>
             <p className="text-white font-medium">{work.title}</p>
             {work.subject && (
@@ -142,21 +211,6 @@ export function PhotoLightbox({
             </a>
           )}
         </div>
-
-        {/* Dots */}
-        {hasMultiple && (
-          <div className="flex gap-1.5 mt-3">
-            {work.images.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                  i === index ? "bg-white" : "bg-white/30"
-                }`}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </motion.div>
   );

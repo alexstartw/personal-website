@@ -9,6 +9,7 @@ import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { ModeTransitionOverlay } from "@/components/ui/ModeTransitionOverlay";
 import { SettingsBubble } from "@/components/ui/SettingsBubble";
 import { SiteContextMenu } from "@/components/ui/SiteContextMenu";
+import { HtmlLangSetter } from "@/components/ui/HtmlLangSetter";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -26,20 +27,77 @@ const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
 });
 
+const BASE = "https://alexstartw.github.io/personal-website";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://alexstartw.github.io"),
   title: {
     default: "Li-Yu Alex Lin — Senior Data Engineer",
     template: "%s | Alex Lin",
   },
   description:
-    "Senior Data Engineer specializing in cloud-native data platforms, GenAI applications, and scalable data infrastructure. Based in Taipei, Taiwan.",
+    "Senior Data Engineer with 5+ years specializing in cloud-native data platforms, event-driven architectures, and GenAI applications. Based in Taipei, Taiwan.",
+  keywords: [
+    "Senior Data Engineer",
+    "Data Engineer",
+    "GenAI",
+    "RAG",
+    "Cloud Native",
+    "Apache Airflow",
+    "dbt",
+    "Microsoft Fabric",
+    "Python",
+    "Taipei",
+    "Taiwan",
+  ],
+  authors: [{ name: "Li-Yu Alex Lin", url: BASE }],
+  creator: "Li-Yu Alex Lin",
+  alternates: { canonical: BASE },
   openGraph: {
     title: "Li-Yu Alex Lin — Senior Data Engineer",
     description:
       "Senior Data Engineer specializing in cloud-native data platforms, GenAI applications, and scalable data infrastructure.",
+    url: BASE,
+    siteName: "Alex Lin",
     type: "website",
-    locale: "en_US",
+    locale: "zh_TW",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Li-Yu Alex Lin — Senior Data Engineer",
+    description:
+      "Senior Data Engineer specializing in cloud-native data platforms, GenAI applications, and scalable data infrastructure.",
+  },
+};
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Li-Yu Alex Lin",
+  alternateName: ["Alex Lin", "林力宇"],
+  url: BASE,
+  jobTitle: "Senior Data Engineer",
+  worksFor: { "@type": "Organization", name: "Datarget" },
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Taipei",
+    addressCountry: "TW",
+  },
+  sameAs: [
+    "https://github.com/alexstartw",
+    "https://www.instagram.com/yu_._photographer/",
+  ],
+  knowsAbout: [
+    "Data Engineering",
+    "Python",
+    "Apache Airflow",
+    "dbt",
+    "Microsoft Fabric",
+    "GenAI",
+    "RAG",
+    "Cloud Native",
+    "Event-driven Architecture",
+  ],
 };
 
 export default function RootLayout({
@@ -49,10 +107,16 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="zh-TW"
       className={`${instrumentSerif.variable} ${cormorantGaramond.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
+      </head>
       <body>
         <ThemeProvider
           attribute="class"
@@ -62,6 +126,7 @@ export default function RootLayout({
           <LanguageProvider>
             <FontSizeProvider>
               <SiteModeProvider>
+                <HtmlLangSetter />
                 <ModeTransitionOverlay />
                 <Navbar />
                 <SiteContextMenu>

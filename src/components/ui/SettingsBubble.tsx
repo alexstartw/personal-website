@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings, ALargeSmall } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -74,7 +74,23 @@ function BubbleBtn({
 // ── SettingsBubble ─────────────────────────────────────────────────────────────
 export function SettingsBubble() {
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
+
+  // Auto-close on click outside
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
   const { lang, setLang } = useLanguage();
   const { fontSize, increase, decrease, reset } = useFontSize();
 
@@ -200,7 +216,10 @@ export function SettingsBubble() {
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+    <div
+      ref={containerRef}
+      className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
+    >
       {/* Expanded panel */}
       <AnimatePresence>
         {open && (

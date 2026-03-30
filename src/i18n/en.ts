@@ -8,6 +8,19 @@ export interface Locale {
     contact: string;
     blog: string;
   };
+  photo: {
+    label: string;
+    subtitle: string;
+    portrait: string;
+    coser: string;
+    view_gallery: string;
+    gallery_label: string;
+    no_works: string;
+    view_on_ig: string;
+    ig_cta_title: string;
+    ig_cta_button: string;
+    back_to: string;
+  };
   hero: {
     badge: string;
     name: string;
@@ -158,6 +171,19 @@ export const en: Locale = {
     label: "Writing",
     heading: "Featured Posts",
     view_all: "View all posts →",
+  },
+  photo: {
+    label: "Photography",
+    subtitle: "Portrait & Cosplay Photography — Taipei, Taiwan",
+    portrait: "Portrait",
+    coser: "Coser",
+    view_gallery: "View gallery",
+    gallery_label: "Gallery",
+    no_works: "No works yet — check back soon.",
+    view_on_ig: "View on Instagram",
+    ig_cta_title: "Business Inquiry / Book a Shoot",
+    ig_cta_button: "Contact →",
+    back_to: "Back to",
   },
   contact: {
     label: "Contact",
