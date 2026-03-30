@@ -53,6 +53,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Li-Yu Alex Lin", url: BASE }],
   creator: "Li-Yu Alex Lin",
   alternates: { canonical: BASE },
+  verification: { google: "x1YedV3TQvFG1cVoPLag-3WuTluEVuKeiufahzBYgRY" },
   openGraph: {
     title: "Li-Yu Alex Lin — Senior Data Engineer",
     description:
