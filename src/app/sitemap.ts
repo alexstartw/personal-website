@@ -5,7 +5,7 @@ import { getAllSlugs } from "@/lib/posts";
 import { getAllPhotoSlugs } from "@/lib/photos";
 import { projects } from "@/data/projects";
 
-const BASE = "https://alexstartw.github.io/personal-website";
+const BASE = "https://www.alexstartw.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const postSlugs = getAllSlugs();

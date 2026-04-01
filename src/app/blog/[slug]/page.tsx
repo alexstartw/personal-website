@@ -41,7 +41,7 @@ function formatDate(iso: string) {
   });
 }
 
-const BASE = "https://alexstartw.github.io/personal-website";
+const BASE = "https://www.alexstartw.com";
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;

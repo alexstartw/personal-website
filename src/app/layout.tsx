@@ -27,10 +27,10 @@ const cormorantGaramond = Cormorant_Garamond({
   display: "swap",
 });
 
-const BASE = "https://alexstartw.github.io/personal-website";
+const BASE = "https://www.alexstartw.com";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://alexstartw.github.io"),
+  metadataBase: new URL("https://www.alexstartw.com"),
   title: {
     default: "Li-Yu Alex Lin — Senior Data Engineer",
     template: "%s | Alex Lin",
