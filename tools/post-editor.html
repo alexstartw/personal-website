@@ -420,6 +420,7 @@ input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accen
   <button class="btn btn-danger" id="btn-delete" onclick="deleteItem()" style="display:none">🗑 Delete</button>
   <button class="btn" id="btn-save" onclick="saveItem()">💾 Save</button>
   <button class="btn btn-primary" id="btn-publish" onclick="publishItem()">🚀 Publish</button>
+  <a href="/import" style="padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Notion Import →</a>
 </div>
 
 <!-- Open Panel (Post & Photo) -->
@@ -722,6 +723,13 @@ async function init() {
   marked.setOptions({ breaks: true, gfm: true });
 
   initScrollSync();
+
+  // Auto-load post from ?slug= query param (e.g. redirect from Notion importer)
+  const urlSlug = new URLSearchParams(window.location.search).get("slug");
+  if (urlSlug) {
+    setMode("post");
+    await loadPost(urlSlug);
+  }
 }
 
 // ── Date ───────────────────────────────────────────────────────────────────
