@@ -346,8 +346,11 @@ input[type=text]:focus, select:focus { border-color: var(--accent); }
           </div>
         </div>
         <div class="fm-field">
-          <label>Cover 圖片路徑</label>
-          <input type="text" id="fmCover" placeholder="/images/posts/covers/..." />
+          <label>Cover 圖片檔名</label>
+          <div style="display:flex;align-items:center;border:1px solid var(--border);border-radius:5px;background:var(--card);overflow:hidden;transition:border-color 0.15s;" onfocusin="this.style.borderColor='var(--accent)'" onfocusout="this.style.borderColor='var(--border)'">
+            <span style="padding:5px 6px;font-size:10px;color:var(--muted);white-space:nowrap;border-right:1px solid var(--border);background:color-mix(in srgb,var(--border) 30%,transparent);flex-shrink:0;">/images/posts/covers/</span>
+            <input type="text" id="fmCover" placeholder="my-cover.png" style="border:none;border-radius:0;flex:1;min-width:0;" />
+          </div>
         </div>
       </div>
     </div>
@@ -641,7 +644,9 @@ async function loadPreview(pageId) {
   document.getElementById("fmSlug").value = r.slug || "";
   document.getElementById("fmDate").value = r.frontmatter.date || "";
   document.getElementById("fmDescription").value = r.frontmatter.description || "";
-  document.getElementById("fmCover").value = r.frontmatter.cover || "";
+  // Show only filename in the input (prefix is fixed)
+  const coverFull = r.frontmatter.cover || "";
+  document.getElementById("fmCover").value = coverFull.replace("/images/posts/covers/", "");
   setTagsFromArray("cat", r.frontmatter.categories || []);
   setTagsFromArray("tag", r.frontmatter.tags || []);
 
@@ -660,7 +665,8 @@ function getFrontmatterOverrides() {
   const slug  = document.getElementById("fmSlug").value.trim();
   const date  = document.getElementById("fmDate").value.trim();
   const desc  = document.getElementById("fmDescription").value.trim();
-  const cover = document.getElementById("fmCover").value.trim();
+  const coverFilename = document.getElementById("fmCover").value.trim();
+  const cover = coverFilename ? `/images/posts/covers/${coverFilename}` : "";
   const o = {};
   if (title) o.title = title;
   if (slug)  o.slug  = slug;
