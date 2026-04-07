@@ -172,7 +172,7 @@ async function handleNotionDatabases(res) {
       items.map((i) => `${i.object}:${i.title}`).join(", "),
     );
 
-    json(res, { items });
+    json(res, { items: items.filter((i) => i.title !== "Untitled") });
   } catch (e) {
     json(res, { error: e.message }, 500);
   }
@@ -209,7 +209,7 @@ async function handleNotionPages(req, res) {
         cover: page.cover?.external?.url || page.cover?.file?.url || null,
       };
     });
-    json(res, { pages });
+    json(res, { pages: pages.filter((p) => p.title !== "Untitled") });
   } catch (e) {
     json(res, { error: e.message }, 500);
   }
@@ -245,7 +245,7 @@ async function handleNotionSearch(req, res) {
         cover: page.cover?.external?.url || page.cover?.file?.url || null,
       };
     });
-    json(res, { pages });
+    json(res, { pages: pages.filter((p) => p.title !== "Untitled") });
   } catch (e) {
     json(res, { error: e.message }, 500);
   }
