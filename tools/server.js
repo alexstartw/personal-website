@@ -262,6 +262,7 @@ async function handleNotionPreview(req, res) {
       pageId,
       notionToken,
       overrides || {},
+      true,
     );
     const fullMd = buildMarkdownFile(result.frontmatter, result.markdownBody);
     json(res, {

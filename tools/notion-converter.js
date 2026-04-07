@@ -122,7 +122,12 @@ function setupCustomTransformers(n2m) {
  * Returns: { updatedBody, images[] }
  * images = [{ notionUrl, localFilename, localPath }]
  */
-function extractImages(markdownBody, slug) {
+/**
+ * @param {string} markdownBody
+ * @param {string} slug
+ * @param {boolean} previewMode - when true, keep original Notion URLs (for live preview)
+ */
+function extractImages(markdownBody, slug, previewMode = false) {
   const images = [];
   let counter = 1;
 
@@ -141,7 +146,8 @@ function extractImages(markdownBody, slug) {
         isCover: false,
       });
       counter++;
-      return `![${alt}](${localPath})`;
+      // Preview: keep Notion URL so browser can render it directly
+      return previewMode ? match : `![${alt}](${localPath})`;
     },
   );
 
@@ -182,7 +188,12 @@ function extractCoverUrl(page) {
  * @param {object} overrides - Optional frontmatter overrides from UI
  * @returns {{ slug, frontmatter, markdownBody, images, rawPage }}
  */
-async function convertNotionPage(pageId, token, overrides = {}) {
+async function convertNotionPage(
+  pageId,
+  token,
+  overrides = {},
+  previewMode = false,
+) {
   const notion = new Client({ auth: token });
   const n2m = new NotionToMarkdown({ notionClient: notion });
   setupCustomTransformers(n2m);
@@ -206,7 +217,11 @@ async function convertNotionPage(pageId, token, overrides = {}) {
   let markdownBody = n2m.toMarkdownString(mdBlocks).parent || "";
 
   // Extract and rewrite inline images
-  const { updatedBody, images } = extractImages(markdownBody, slug);
+  const { updatedBody, images } = extractImages(
+    markdownBody,
+    slug,
+    previewMode,
+  );
   markdownBody = updatedBody;
 
   // Handle cover image
