@@ -147,7 +147,9 @@ async function handleNotionDatabases(res) {
           (p) => p.type === "title",
         );
         title =
-          titleProp?.title?.map((t) => t.plain_text).join("") || "Untitled";
+          (Array.isArray(titleProp?.title)
+            ? titleProp.title.map((t) => t.plain_text).join("")
+            : "") || "Untitled";
       }
 
       // Resolve parent id
@@ -195,7 +197,9 @@ async function handleNotionPages(req, res) {
         (p) => p.type === "title",
       );
       const title =
-        titleProp?.title?.map((t) => t.plain_text).join("") || "Untitled";
+        (Array.isArray(titleProp?.title)
+          ? titleProp.title.map((t) => t.plain_text).join("")
+          : "") || "Untitled";
       return {
         id: page.id,
         title,
@@ -229,7 +233,9 @@ async function handleNotionSearch(req, res) {
         (p) => p.type === "title",
       );
       const title =
-        titleProp?.title?.map((t) => t.plain_text).join("") || "Untitled";
+        (Array.isArray(titleProp?.title)
+          ? titleProp.title.map((t) => t.plain_text).join("")
+          : "") || "Untitled";
       return {
         id: page.id,
         title,
