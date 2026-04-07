@@ -38,7 +38,7 @@ function richTextToPlain(richTexts) {
 
 function extractTitle(page) {
   const titleProp = Object.values(page.properties || {}).find(
-    (p) => p.type === "title"
+    (p) => p.type === "title",
   );
   if (titleProp) return richTextToPlain(titleProp.title);
   return "Untitled";
@@ -47,7 +47,7 @@ function extractTitle(page) {
 function extractDate(page) {
   // Try a Date property first, fall back to created_time
   const dateProp = Object.values(page.properties || {}).find(
-    (p) => p.type === "date" && p.date?.start
+    (p) => p.type === "date" && p.date?.start,
   );
   if (dateProp) return dateProp.date.start;
   return (page.created_time || new Date().toISOString()).slice(0, 10);
@@ -68,7 +68,13 @@ function extractMultiSelect(page, propertyNames) {
 
 function extractDescription(page) {
   // Try a rich_text property named Description / Summary / Excerpt
-  const candidates = ["Description", "description", "Summary", "Excerpt", "摘要"];
+  const candidates = [
+    "Description",
+    "description",
+    "Summary",
+    "Excerpt",
+    "摘要",
+  ];
   for (const name of candidates) {
     const prop = page.properties?.[name];
     if (prop?.type === "rich_text") {
@@ -123,14 +129,20 @@ function extractImages(markdownBody, slug) {
   const updatedBody = markdownBody.replace(
     /!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/g,
     (match, alt, imgUrl) => {
-      // Only process URLs that look like Notion-hosted or S3 images
       const ext = extractExtension(imgUrl);
       const localFilename = `${slug}-${counter}${ext}`;
-      const localPath = `/images/posts/content/${localFilename}`;
-      images.push({ notionUrl: imgUrl, localFilename, localPath, isCover: false });
+      // Convention: /images/posts/<slug>/<filename>  (matches existing posts)
+      const localPath = `/images/posts/${slug}/${localFilename}`;
+      images.push({
+        notionUrl: imgUrl,
+        localFilename,
+        localPath,
+        slug,
+        isCover: false,
+      });
       counter++;
       return `![${alt}](${localPath})`;
-    }
+    },
   );
 
   return { updatedBody, images };
@@ -182,8 +194,11 @@ async function convertNotionPage(pageId, token, overrides = {}) {
   const title = overrides.title || extractTitle(page);
   const slug = overrides.slug || titleToSlug(title);
   const date = overrides.date || extractDate(page);
-  const tags = overrides.tags || extractMultiSelect(page, ["Tags", "tags", "Tag", "標籤"]);
-  const categories = overrides.categories || extractMultiSelect(page, ["Categories", "Category", "categories", "分類"]);
+  const tags =
+    overrides.tags || extractMultiSelect(page, ["Tags", "tags", "Tag", "標籤"]);
+  const categories =
+    overrides.categories ||
+    extractMultiSelect(page, ["Categories", "Category", "categories", "分類"]);
   const description = overrides.description || extractDescription(page);
 
   // Convert blocks to Markdown
@@ -229,7 +244,8 @@ function renderFrontmatter(fm) {
   const lines = ["---"];
   lines.push(`title: "${fm.title.replace(/"/g, '\\"')}"`);
   lines.push(`date: "${fm.date}"`);
-  if (fm.description) lines.push(`description: "${fm.description.replace(/"/g, '\\"')}"`);
+  if (fm.description)
+    lines.push(`description: "${fm.description.replace(/"/g, '\\"')}"`);
   if (fm.categories?.length) {
     lines.push("categories:");
     fm.categories.forEach((c) => lines.push(`  - ${c}`));

@@ -33,6 +33,18 @@ const PHOTOS_IMG_DIR = path.join(ROOT, "public", "images", "photos");
   },
 );
 
+// Load .env.local if present
+const envPath = path.join(ROOT, ".env.local");
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, "utf-8")
+    .split("\n")
+    .forEach((line) => {
+      const match = line.match(/^\s*([^#=\s][^=]*?)\s*=\s*(.*)\s*$/);
+      if (match) process.env[match[1]] = match[2].replace(/^["']|["']$/g, "");
+    });
+  if (process.env.NOTION_TOKEN) notionToken = process.env.NOTION_TOKEN;
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function readBody(req) {
@@ -122,16 +134,43 @@ async function handleNotionDatabases(res) {
   const { Client } = require("@notionhq/client");
   const notion = new Client({ auth: notionToken });
   try {
-    const response = await notion.search({
-      filter: { property: "object", value: "database" },
-      page_size: 50,
+    const response = await notion.search({ page_size: 100 });
+    const all = response.results;
+
+    // Normalise every result into a common shape with parent info for tree building
+    const items = all.map((r) => {
+      let title = "Untitled";
+      if (r.object === "database") {
+        title = r.title?.[0]?.plain_text || "Untitled";
+      } else {
+        const titleProp = Object.values(r.properties || {}).find(
+          (p) => p.type === "title",
+        );
+        title =
+          titleProp?.title?.map((t) => t.plain_text).join("") || "Untitled";
+      }
+
+      // Resolve parent id
+      let parentId = null;
+      if (r.parent?.type === "database_id") parentId = r.parent.database_id;
+      else if (r.parent?.type === "page_id") parentId = r.parent.page_id;
+
+      return {
+        id: r.id,
+        object: r.object, // "page" | "database"
+        title,
+        parentId,
+        last_edited_time: r.last_edited_time || null,
+        cover: r.cover?.external?.url || r.cover?.file?.url || null,
+      };
     });
-    const databases = response.results.map((db) => ({
-      id: db.id,
-      title: db.title?.[0]?.plain_text || "Untitled",
-      url: db.url,
-    }));
-    json(res, { databases });
+
+    console.log(
+      `[Notion] search returned ${all.length} items:`,
+      items.map((i) => `${i.object}:${i.title}`).join(", "),
+    );
+
+    json(res, { items });
   } catch (e) {
     json(res, { error: e.message }, 500);
   }

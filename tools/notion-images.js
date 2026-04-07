@@ -11,11 +11,11 @@ const https = require("https");
 const http = require("http");
 
 const ROOT = path.join(__dirname, "..");
+const POSTS_IMG_DIR = path.join(ROOT, "public", "images", "posts");
 const COVERS_DIR = path.join(ROOT, "public", "images", "posts", "covers");
-const CONTENT_IMG_DIR = path.join(ROOT, "public", "images", "posts", "content");
 
-// Ensure directories exist
-[COVERS_DIR, CONTENT_IMG_DIR].forEach((d) => {
+// Ensure base dirs exist
+[POSTS_IMG_DIR, COVERS_DIR].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
@@ -39,8 +39,17 @@ function downloadFile(imgUrl, destDir, filename, maxRedirects = 5) {
     const destPath = path.join(destDir, filename);
 
     const req = proto.get(imgUrl, { timeout: 30000 }, (res) => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return downloadFile(res.headers.location, destDir, filename, maxRedirects - 1)
+      if (
+        res.statusCode >= 300 &&
+        res.statusCode < 400 &&
+        res.headers.location
+      ) {
+        return downloadFile(
+          res.headers.location,
+          destDir,
+          filename,
+          maxRedirects - 1,
+        )
           .then(resolve)
           .catch(reject);
       }
@@ -73,16 +82,26 @@ async function downloadImages(images, onProgress) {
 
   for (let i = 0; i < images.length; i++) {
     const img = images[i];
-    const destDir = img.isCover ? COVERS_DIR : CONTENT_IMG_DIR;
+    // Content images → public/images/posts/<slug>/  (per-post directory)
+    // Cover images   → public/images/posts/covers/
+    let destDir;
+    if (img.isCover) {
+      destDir = COVERS_DIR;
+    } else {
+      destDir = path.join(POSTS_IMG_DIR, img.slug);
+      if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+    }
 
     try {
       await downloadFile(img.notionUrl, destDir, img.localFilename);
       results.push({ ...img, ok: true });
-      if (onProgress) onProgress(i + 1, images.length, img.localFilename, true, null);
+      if (onProgress)
+        onProgress(i + 1, images.length, img.localFilename, true, null);
     } catch (err) {
       // Don't abort the whole import — leave a placeholder comment
       results.push({ ...img, ok: false, error: err.message });
-      if (onProgress) onProgress(i + 1, images.length, img.localFilename, false, err.message);
+      if (onProgress)
+        onProgress(i + 1, images.length, img.localFilename, false, err.message);
     }
   }
 
@@ -104,7 +123,7 @@ function patchFailedImages(markdownBody, results) {
       // Replace the local path reference with a comment
       body = body.replace(
         new RegExp(`!\\[([^\\]]*)\\]\\(${escapeRegex(r.localPath)}\\)`, "g"),
-        `<!-- Image download failed (${r.error}): ${r.notionUrl} -->`
+        `<!-- Image download failed (${r.error}): ${r.notionUrl} -->`,
       );
     }
   }
