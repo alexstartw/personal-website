@@ -12,6 +12,11 @@ const path = require("path");
 const https = require("https");
 const url = require("url");
 const { exec } = require("child_process");
+const { convertNotionPage, buildMarkdownFile } = require("./notion-converter");
+const { downloadImages, patchFailedImages } = require("./notion-images");
+
+// In-memory Notion token store (session only, never written to disk)
+let notionToken = process.env.NOTION_TOKEN || "";
 
 const PORT = 3001;
 const ROOT = path.join(__dirname, "..");
@@ -89,6 +94,185 @@ function handleEditor(res) {
   const html = fs.readFileSync(htmlPath, "utf-8");
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   res.end(html);
+}
+
+function handleNotionImporter(res) {
+  const htmlPath = path.join(__dirname, "notion-import.html");
+  const html = fs.readFileSync(htmlPath, "utf-8");
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+  res.end(html);
+}
+
+// ── Notion API handlers ───────────────────────────────────────────────────────
+
+async function handleNotionSetToken(req, res) {
+  const buf = await readBody(req);
+  const { token } = JSON.parse(buf.toString());
+  if (!token) return json(res, { error: "Missing token" }, 400);
+  notionToken = token.trim();
+  json(res, { ok: true });
+}
+
+function handleNotionStatus(res) {
+  json(res, { configured: !!notionToken });
+}
+
+async function handleNotionDatabases(res) {
+  if (!notionToken) return json(res, { error: "Notion token not set" }, 401);
+  const { Client } = require("@notionhq/client");
+  const notion = new Client({ auth: notionToken });
+  try {
+    const response = await notion.search({
+      filter: { property: "object", value: "database" },
+      page_size: 50,
+    });
+    const databases = response.results.map((db) => ({
+      id: db.id,
+      title: db.title?.[0]?.plain_text || "Untitled",
+      url: db.url,
+    }));
+    json(res, { databases });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
+async function handleNotionPages(req, res) {
+  if (!notionToken) return json(res, { error: "Notion token not set" }, 401);
+  const { query } = url.parse(req.url, true);
+  const databaseId = query.database_id;
+  if (!databaseId) return json(res, { error: "Missing database_id" }, 400);
+
+  const { Client } = require("@notionhq/client");
+  const notion = new Client({ auth: notionToken });
+  try {
+    const response = await notion.databases.query({
+      database_id: databaseId,
+      page_size: 100,
+      sorts: [{ timestamp: "last_edited_time", direction: "descending" }],
+    });
+    const pages = response.results.map((page) => {
+      const titleProp = Object.values(page.properties || {}).find(
+        (p) => p.type === "title",
+      );
+      const title =
+        titleProp?.title?.map((t) => t.plain_text).join("") || "Untitled";
+      return {
+        id: page.id,
+        title,
+        url: page.url,
+        created_time: page.created_time,
+        last_edited_time: page.last_edited_time,
+        cover: page.cover?.external?.url || page.cover?.file?.url || null,
+      };
+    });
+    json(res, { pages });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
+async function handleNotionSearch(req, res) {
+  if (!notionToken) return json(res, { error: "Notion token not set" }, 401);
+  const { query: q } = url.parse(req.url, true);
+  const query = q.query || "";
+
+  const { Client } = require("@notionhq/client");
+  const notion = new Client({ auth: notionToken });
+  try {
+    const response = await notion.search({
+      query,
+      filter: { property: "object", value: "page" },
+      page_size: 30,
+    });
+    const pages = response.results.map((page) => {
+      const titleProp = Object.values(page.properties || {}).find(
+        (p) => p.type === "title",
+      );
+      const title =
+        titleProp?.title?.map((t) => t.plain_text).join("") || "Untitled";
+      return {
+        id: page.id,
+        title,
+        url: page.url,
+        created_time: page.created_time,
+        last_edited_time: page.last_edited_time,
+        cover: page.cover?.external?.url || page.cover?.file?.url || null,
+      };
+    });
+    json(res, { pages });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
+async function handleNotionPreview(req, res) {
+  if (!notionToken) return json(res, { error: "Notion token not set" }, 401);
+  const buf = await readBody(req);
+  const { pageId, overrides } = JSON.parse(buf.toString());
+  if (!pageId) return json(res, { error: "Missing pageId" }, 400);
+
+  try {
+    const result = await convertNotionPage(
+      pageId,
+      notionToken,
+      overrides || {},
+    );
+    const fullMd = buildMarkdownFile(result.frontmatter, result.markdownBody);
+    json(res, {
+      slug: result.slug,
+      frontmatter: result.frontmatter,
+      markdownBody: result.markdownBody,
+      markdownFile: fullMd,
+      images: result.images,
+      exists: fs.existsSync(path.join(POSTS_DIR, `${result.slug}.md`)),
+    });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
+}
+
+async function handleNotionImport(req, res) {
+  if (!notionToken) return json(res, { error: "Notion token not set" }, 401);
+  const buf = await readBody(req);
+  const { pageId, overrides, overwrite } = JSON.parse(buf.toString());
+  if (!pageId) return json(res, { error: "Missing pageId" }, 400);
+
+  try {
+    // 1. Convert page
+    const result = await convertNotionPage(
+      pageId,
+      notionToken,
+      overrides || {},
+    );
+    const { slug, frontmatter, images } = result;
+    let { markdownBody } = result;
+
+    // 2. Check duplicate
+    const destFile = path.join(POSTS_DIR, `${slug}.md`);
+    if (fs.existsSync(destFile) && !overwrite) {
+      return json(res, { exists: true, slug }, 409);
+    }
+
+    // 3. Download images
+    const imgResults = await downloadImages(images);
+    markdownBody = patchFailedImages(markdownBody, imgResults);
+
+    // 4. Write .md file
+    const fullMd = buildMarkdownFile(frontmatter, markdownBody);
+    fs.writeFileSync(destFile, fullMd, "utf-8");
+
+    const failedImages = imgResults.filter((r) => !r.ok);
+    json(res, {
+      ok: true,
+      slug,
+      title: frontmatter.title,
+      failedImages,
+      editorUrl: `/editor?slug=${encodeURIComponent(slug)}`,
+    });
+  } catch (e) {
+    json(res, { error: e.message }, 500);
+  }
 }
 
 function handleGetPosts(res) {
@@ -358,6 +542,24 @@ const server = http.createServer(async (req, res) => {
 
   try {
     if (pathname === "/" || pathname === "/editor") return handleEditor(res);
+    if (pathname === "/import") return handleNotionImporter(res);
+
+    // Notion API routes
+    if (pathname === "/api/notion/token" && req.method === "POST")
+      return await handleNotionSetToken(req, res);
+    if (pathname === "/api/notion/status" && req.method === "GET")
+      return handleNotionStatus(res);
+    if (pathname === "/api/notion/databases" && req.method === "GET")
+      return await handleNotionDatabases(res);
+    if (pathname === "/api/notion/pages" && req.method === "GET")
+      return await handleNotionPages(req, res);
+    if (pathname === "/api/notion/search" && req.method === "GET")
+      return await handleNotionSearch(req, res);
+    if (pathname === "/api/notion/preview" && req.method === "POST")
+      return await handleNotionPreview(req, res);
+    if (pathname === "/api/notion/import" && req.method === "POST")
+      return await handleNotionImport(req, res);
+
     if (pathname === "/api/posts" && req.method === "GET")
       return handleGetPosts(res);
     if (pathname === "/api/covers" && req.method === "GET")
